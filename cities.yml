@@ -1,0 +1,124 @@
+# cities.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Source-of-truth config for which cities each site scrapes.
+#
+# Structure:
+#   sites:
+#     <site_key>:
+#       enabled: true/false          — toggle a site without deleting its config
+#       cities:
+#         - name: "Human name"       — used in logs and output filenames
+#           search_url: "..."        — full URL to the first results page
+#           city: "Toronto"          — normalized city field in output JSON
+#           province: "ON"           — normalized province field in output JSON
+#
+# CLI override:  python3 scheduler.py --site realtor_ca --city "Vancouver, BC"
+# That will find the first city entry whose `name` contains the CLI string
+# (case-insensitive) and run only that one city for that site.
+# ─────────────────────────────────────────────────────────────────────────────
+
+sites:
+
+  # ── Realtor.ca ───────────────────────────────────────────────────────────────
+  # Canada's national MLS-backed listing portal. Public, no auth required.
+  # URL pattern: /real-estate/ontario/toronto/ with ?CurrentPage=1
+  realtor_ca:
+    enabled: true
+    cities:
+      - name: "Toronto, ON"
+        search_url: "https://www.realtor.ca/real-estate/ontario/toronto/?CurrentPage=1&RecordsPerPage=25&LatitudeMax=43.8554&LongitudeMax=-79.1290&LatitudeMin=43.5804&LongitudeMin=-79.6385&SortBy=6&SortOrder=A&view=listView"
+        city: "Toronto"
+        province: "ON"
+
+      - name: "Vancouver, BC"
+        search_url: "https://www.realtor.ca/real-estate/british-columbia/vancouver/?CurrentPage=1&RecordsPerPage=25&SortBy=6&SortOrder=A&view=listView"
+        city: "Vancouver"
+        province: "BC"
+
+      - name: "Calgary, AB"
+        search_url: "https://www.realtor.ca/real-estate/alberta/calgary/?CurrentPage=1&RecordsPerPage=25&SortBy=6&SortOrder=A&view=listView"
+        city: "Calgary"
+        province: "AB"
+
+      - name: "Ottawa, ON"
+        search_url: "https://www.realtor.ca/real-estate/ontario/ottawa/?CurrentPage=1&RecordsPerPage=25&SortBy=6&SortOrder=A&view=listView"
+        city: "Ottawa"
+        province: "ON"
+
+      - name: "Montreal, QC"
+        search_url: "https://www.realtor.ca/real-estate/quebec/montreal/?CurrentPage=1&RecordsPerPage=25&SortBy=6&SortOrder=A&view=listView"
+        city: "Montreal"
+        province: "QC"
+
+  # ── Kijiji Real Estate ───────────────────────────────────────────────────────
+  # Canada's largest classifieds platform. Real estate section is public.
+  # Simpler HTML than Realtor.ca — less JS-heavy, faster to scrape.
+  # URL pattern: /b-real-estate/city-name/c34lXXXX
+  kijiji:
+    enabled: true
+    cities:
+      - name: "Toronto, ON"
+        search_url: "https://www.kijiji.ca/b-real-estate/city-of-toronto/c34l1700273?ad=offering&for-sale-by=owner"
+        city: "Toronto"
+        province: "ON"
+
+      - name: "Vancouver, BC"
+        search_url: "https://www.kijiji.ca/b-real-estate/vancouver/c34l1700287?ad=offering&for-sale-by=owner"
+        city: "Vancouver"
+        province: "BC"
+
+      - name: "Calgary, AB"
+        search_url: "https://www.kijiji.ca/b-real-estate/calgary/c34l1700199?ad=offering&for-sale-by=owner"
+        city: "Calgary"
+        province: "AB"
+
+      - name: "Ottawa, ON"
+        search_url: "https://www.kijiji.ca/b-real-estate/ottawa/c34l1700185?ad=offering&for-sale-by=owner"
+        city: "Ottawa"
+        province: "ON"
+
+      - name: "Montreal, QC"
+        search_url: "https://www.kijiji.ca/b-real-estate/ville-de-montreal/c34l1700281?ad=offering&for-sale-by=owner"
+        city: "Montreal"
+        province: "QC"
+
+  # ── Point2Homes ──────────────────────────────────────────────────────────────
+  # Public Canadian real estate aggregator. Good coverage of smaller markets.
+  # URL pattern: /real-estate-listings/canada/province/city
+  point2homes:
+    enabled: true
+    cities:
+      - name: "Toronto, ON"
+        search_url: "https://www.point2homes.com/real-estate-listings/canada/ontario/toronto.html"
+        city: "Toronto"
+        province: "ON"
+
+      - name: "Vancouver, BC"
+        search_url: "https://www.point2homes.com/real-estate-listings/canada/british-columbia/vancouver.html"
+        city: "Vancouver"
+        province: "BC"
+
+      - name: "Calgary, AB"
+        search_url: "https://www.point2homes.com/real-estate-listings/canada/alberta/calgary.html"
+        city: "Calgary"
+        province: "AB"
+
+      - name: "Ottawa, ON"
+        search_url: "https://www.point2homes.com/real-estate-listings/canada/ontario/ottawa.html"
+        city: "Ottawa"
+        province: "ON"
+
+      - name: "Montreal, QC"
+        search_url: "https://www.point2homes.com/real-estate-listings/canada/quebec/montreal.html"
+        city: "Montreal"
+        province: "QC"
+
+      - name: "Edmonton, AB"
+        search_url: "https://www.point2homes.com/real-estate-listings/canada/alberta/edmonton.html"
+        city: "Edmonton"
+        province: "AB"
+
+      - name: "Winnipeg, MB"
+        search_url: "https://www.point2homes.com/real-estate-listings/canada/manitoba/winnipeg.html"
+        city: "Winnipeg"
+        province: "MB"

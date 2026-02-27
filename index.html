@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE:PULSE — Real Estate Market Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f4f0e8;
+    --cream: #ede8d8;
+    --warm: #c8b99a;
+    --accent: #c1440e;
+    --accent2: #2a6049;
+    --accent3: #1a3a5c;
+    --gold: #c9a84c;
+    --muted: #7a7166;
+    --card-bg: rgba(255,255,255,0.55);
+    --border: rgba(10,10,15,0.12);
+    --shadow: 0 2px 24px rgba(10,10,15,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── Header ────────────────────────────────────────────── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0 3rem;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 0;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .brand-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .brand-text span {
+    color: var(--accent);
+  }
+
+  .brand-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--warm);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--warm);
+    letter-spacing: 0.08em;
+  }
+
+  .market-signal-badge {
+    padding: 0.4rem 1rem;
+    background: rgba(193,68,14,0.2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+  }
+
+  /* ── Hero Strip ─────────────────────────────────────────── */
+  .hero-strip {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a1a2e 50%, #0f2027 100%);
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-strip::before {
+    content: 'TORONTO RE MARKET';
+    position: absolute;
+    bottom: -1rem;
+    right: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    letter-spacing: -0.02em;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .hero-kpi {
+    padding: 0 2.5rem;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    animation: fadeSlideUp 0.6s ease both;
+  }
+  .hero-kpi:nth-child(1) { animation-delay: 0.05s; padding-left: 0; }
+  .hero-kpi:nth-child(2) { animation-delay: 0.15s; }
+  .hero-kpi:nth-child(3) { animation-delay: 0.25s; }
+  .hero-kpi:last-child { animation-delay: 0.35s; border-right: none; }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-kpi-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--warm);
+    margin-bottom: 0.6rem;
+  }
+
+  .hero-kpi-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-kpi-value .currency {
+    font-size: 1.2rem;
+    vertical-align: super;
+    color: var(--warm);
+  }
+
+  .hero-kpi-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+
+  .hero-kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    margin-top: 0.5rem;
+  }
+  .delta-up { color: #4caf8a; }
+  .delta-down { color: var(--accent); }
+
+  /* ── Main layout ──────────────────────────────────────── */
+  .main {
+    padding: 2.5rem 3rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Charts grid ──────────────────────────────────────── */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    backdrop-filter: blur(4px);
+    position: relative;
+    overflow: hidden;
+    animation: fadeSlideUp 0.5s ease both;
+  }
+
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .chart-card.accent-red::before { background: var(--accent); }
+  .chart-card.accent-green::before { background: var(--accent2); }
+  .chart-card.accent-blue::before { background: var(--accent3); }
+  .chart-card.accent-gold::before { background: var(--gold); }
+
+  .chart-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .chart-card-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── Inventory bar cards ─────────────────────────────── */
+  .inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .inv-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    animation: fadeSlideUp 0.5s ease both;
+  }
+
+  .inv-card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .inv-card-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .inv-bar-track {
+    height: 6px;
+    background: var(--cream);
+    border-radius: 0;
+    overflow: hidden;
+    margin-bottom: 0.4rem;
+  }
+  .inv-bar-fill {
+    height: 100%;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 0;
+  }
+
+  .inv-bar-legend {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+  }
+
+  /* ── Listings table ───────────────────────────────────── */
+  .listings-section { margin-bottom: 3rem; }
+
+  .table-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .search-box {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--ink);
+    outline: none;
+    width: 220px;
+  }
+  .search-box:focus { border-color: var(--accent); }
+
+  .listings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+  }
+
+  .listings-table thead {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .listings-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.9rem 1rem;
+    text-align: left;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  .listings-table th:hover { background: rgba(255,255,255,0.08); }
+  .listings-table th.sort-asc::after { content: ' ↑'; }
+  .listings-table th.sort-desc::after { content: ' ↓'; }
+
+  .listings-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  .listings-table tbody tr {
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  .listings-table tbody tr:hover { background: rgba(193,68,14,0.04); }
+  .listings-table tbody tr:last-child td { border-bottom: none; }
+
+  .status-pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .status-Active { background: #d4edda; color: #155724; }
+  .status-Pending { background: #fff3cd; color: #856404; }
+  .status-Sold { background: #f8d7da; color: #721c24; }
+
+  .type-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .price-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .ppsf-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .dom-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+  }
+  .dom-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dom-fast { background: #4caf8a; }
+  .dom-medium { background: var(--gold); }
+  .dom-slow { background: var(--accent); }
+
+  .listing-id-cell {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  .agent-cell {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  /* ── Footer ───────────────────────────────────────────── */
+  footer {
+    background: var(--ink);
+    color: var(--warm);
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    border-top: 3px solid var(--accent);
+  }
+
+  .footer-note {
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  /* ── Modal ────────────────────────────────────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.7);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 2rem;
+    max-width: 520px;
+    width: 90%;
+    position: relative;
+    animation: fadeSlideUp 0.25s ease;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: none; border: none;
+    font-size: 1.2rem; cursor: pointer;
+    color: var(--muted);
+  }
+
+  .modal-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .modal-address {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+  }
+
+  .modal-city {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-stat { }
+  .modal-stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+  .modal-stat-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .modal-link {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.2rem;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .modal-link:hover { background: var(--accent); }
+
+  /* ── Responsive ───────────────────────────────────────── */
+  @media (max-width: 1200px) {
+    .charts-grid { grid-template-columns: 1fr 1fr; }
+    .charts-grid .chart-card:first-child { grid-column: span 2; }
+  }
+  @media (max-width: 900px) {
+    .hero-strip { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .charts-grid .chart-card:first-child { grid-column: span 1; }
+    .inventory-grid { grid-template-columns: 1fr; }
+    .main { padding: 1.5rem; }
+    header { padding: 0 1.5rem; }
+    .hero-strip { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────── -->
+<header>
+  <div class="header-brand">
+    <div class="brand-mark">R</div>
+    <div>
+      <div class="brand-text">RE<span>:</span>PULSE</div>
+      <div class="brand-sub">Real Estate Market Intelligence</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div>
+      <div style="color: var(--paper); font-size: 0.75rem; margin-bottom: 2px;">Toronto, ON</div>
+      <div>Updated Feb 27, 2026</div>
+    </div>
+    <div class="market-signal-badge" id="signal-badge">Buyer's Market</div>
+  </div>
+</header>
+
+<!-- ── Hero KPIs ──────────────────────────────────────────────── -->
+<div class="hero-strip">
+  <div class="hero-kpi">
+    <div class="hero-kpi-label">Avg List Price</div>
+    <div class="hero-kpi-value"><span class="currency">$</span>1.75M</div>
+    <div class="hero-kpi-sub">Median $1.48M</div>
+    <div class="hero-kpi-delta delta-up">▲ 2.4% vs last month</div>
+  </div>
+  <div class="hero-kpi">
+    <div class="hero-kpi-label">Avg $/sqft</div>
+    <div class="hero-kpi-value"><span class="currency">$</span>968</div>
+    <div class="hero-kpi-sub">Median $926/sqft</div>
+    <div class="hero-kpi-delta delta-down">▼ 1.1% vs last month</div>
+  </div>
+  <div class="hero-kpi">
+    <div class="hero-kpi-label">Avg Days on Market</div>
+    <div class="hero-kpi-value">10.1</div>
+    <div class="hero-kpi-sub">Median 8 days</div>
+    <div class="hero-kpi-delta delta-down">▼ 3.2 days vs last month</div>
+  </div>
+  <div class="hero-kpi">
+    <div class="hero-kpi-label">Active Listings</div>
+    <div class="hero-kpi-value">15</div>
+    <div class="hero-kpi-sub">12 Active · 2 Pending · 1 Sold</div>
+    <div class="hero-kpi-delta" style="color: var(--warm);">Supply ratio 4.0</div>
+  </div>
+</div>
+
+<!-- ── Main ───────────────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- Charts row -->
+  <div class="section-label">Market Analytics</div>
+  <div class="charts-grid" style="margin-bottom: 2.5rem;">
+
+    <!-- Price by type bar chart -->
+    <div class="chart-card accent-red" style="animation-delay: 0.1s;">
+      <div class="chart-card-title">Price by Property Type</div>
+      <div class="chart-card-subtitle">Avg vs Median list price</div>
+      <div class="chart-wrap"><canvas id="priceByTypeChart" height="160"></canvas></div>
+    </div>
+
+    <!-- Status donut -->
+    <div class="chart-card accent-blue" style="animation-delay: 0.2s;">
+      <div class="chart-card-title">Listing Status</div>
+      <div class="chart-card-subtitle">Distribution</div>
+      <div class="chart-wrap"><canvas id="statusChart" height="160"></canvas></div>
+    </div>
+
+    <!-- DOM histogram -->
+    <div class="chart-card accent-gold" style="animation-delay: 0.3s;">
+      <div class="chart-card-title">Days on Market</div>
+      <div class="chart-card-subtitle">Distribution</div>
+      <div class="chart-wrap"><canvas id="domChart" height="160"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- Second chart row -->
+  <div class="charts-grid" style="margin-bottom: 2.5rem; grid-template-columns: 1fr 1fr;">
+
+    <!-- Price scatter -->
+    <div class="chart-card accent-green" style="animation-delay: 0.4s;">
+      <div class="chart-card-title">Price vs Square Footage</div>
+      <div class="chart-card-subtitle">Each point = one listing</div>
+      <div class="chart-wrap"><canvas id="scatterChart" height="180"></canvas></div>
+    </div>
+
+    <!-- PPSF by type -->
+    <div class="chart-card accent-red" style="animation-delay: 0.5s;">
+      <div class="chart-card-title">Price / Sqft by Type</div>
+      <div class="chart-card-subtitle">Spread analysis</div>
+      <div class="chart-wrap"><canvas id="ppsfChart" height="180"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- Inventory summary bars -->
+  <div class="section-label">Inventory Breakdown</div>
+  <div class="inventory-grid">
+    <div class="inv-card" style="animation-delay: 0.1s;">
+      <div class="inv-card-label">Houses</div>
+      <div class="inv-card-value">6 <span style="font-size:1rem; color:var(--muted);">listings</span></div>
+      <div class="inv-bar-track"><div class="inv-bar-fill" style="background: var(--accent);" data-width="40"></div></div>
+      <div class="inv-bar-legend"><span>Avg $2.60M</span><span>Median $2.50M</span></div>
+    </div>
+    <div class="inv-card" style="animation-delay: 0.2s;">
+      <div class="inv-card-label">Condos</div>
+      <div class="inv-card-value">7 <span style="font-size:1rem; color:var(--muted);">listings</span></div>
+      <div class="inv-bar-track"><div class="inv-bar-fill" style="background: var(--accent3);" data-width="47"></div></div>
+      <div class="inv-bar-legend"><span>Avg $1.09M</span><span>Median $899K</span></div>
+    </div>
+    <div class="inv-card" style="animation-delay: 0.3s;">
+      <div class="inv-card-label">Townhouses</div>
+      <div class="inv-card-value">2 <span style="font-size:1rem; color:var(--muted);">listings</span></div>
+      <div class="inv-bar-track"><div class="inv-bar-fill" style="background: var(--gold);" data-width="13"></div></div>
+      <div class="inv-bar-legend"><span>Avg $1.49M</span><span>Median $1.49M</span></div>
+    </div>
+  </div>
+
+  <!-- Listings Table -->
+  <div class="listings-section">
+    <div class="section-label">All Listings</div>
+
+    <div class="table-controls">
+      <div class="filter-group">
+        <button class="filter-btn active" onclick="filterTable('All', this)">All (15)</button>
+        <button class="filter-btn" onclick="filterTable('Active', this)">Active (12)</button>
+        <button class="filter-btn" onclick="filterTable('Pending', this)">Pending (2)</button>
+        <button class="filter-btn" onclick="filterTable('Sold', this)">Sold (1)</button>
+        <button class="filter-btn" onclick="filterTable('House', this)">Houses</button>
+        <button class="filter-btn" onclick="filterTable('Condo', this)">Condos</button>
+        <button class="filter-btn" onclick="filterTable('Townhouse', this)">Townhouses</button>
+      </div>
+      <input type="text" class="search-box" placeholder="Search address…" id="searchInput" oninput="searchTable(this.value)">
+    </div>
+
+    <table class="listings-table" id="listingsTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable('listing_id')">ID</th>
+          <th onclick="sortTable('property_address')">Address</th>
+          <th onclick="sortTable('property_type')">Type</th>
+          <th onclick="sortTable('listing_price')">List Price</th>
+          <th onclick="sortTable('price_per_sqft')">$/sqft</th>
+          <th onclick="sortTable('bedrooms')">Bed</th>
+          <th onclick="sortTable('bathrooms')">Bath</th>
+          <th onclick="sortTable('square_feet')">Sqft</th>
+          <th onclick="sortTable('days_on_market')">DOM</th>
+          <th onclick="sortTable('listing_status')">Status</th>
+          <th onclick="sortTable('agent_name')">Agent</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────────── -->
+<footer>
+  <div>RE:PULSE v1.0 · Real Estate Market Intelligence</div>
+  <div class="footer-note">
+    Data sourced from publicly available listings. Scraper respects robots.txt and ToS. For informational purposes only. Not financial or real estate advice.
+  </div>
+</footer>
+
+<!-- ── Listing Detail Modal ───────────────────────────────────── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-price" id="modal-price"></div>
+    <div class="modal-address" id="modal-address"></div>
+    <div class="modal-city" id="modal-city"></div>
+    <div class="modal-grid" id="modal-stats"></div>
+    <a class="modal-link" id="modal-link" href="#" target="_blank" rel="noopener">View Listing ↗</a>
+  </div>
+</div>
+
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+// !! REPLACE with your actual GitHub username and repo name !!
+const GITHUB_USER = 'YOUR_USERNAME';
+const GITHUB_REPO = 're-pulse-scraper';
+const DATA_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/analysis.json`;
+
+// Fallback data used when running locally (file://) or if fetch fails
+const FALLBACK_DATA = {"generated_at":"2026-02-27T15:14:46.860537","total_listings":15,"by_status":{"active":12,"pending":2,"sold":1},"pricing":{"avg_list_price":1746466,"median_list_price":1480000,"min_price":549000,"max_price":4500000,"avg_active_price":1826916,"avg_price_per_sqft":968,"median_price_per_sqft":926},"velocity":{"avg_days_on_market":10.1,"median_days_on_market":8,"listings_under_7_days":7,"listings_over_30_days":0},"inventory":{"avg_sqft":2045,"supply_demand_ratio":4.0,"market_signal":"Buyer's Market"},"by_type":{"House":{"count":6,"avg_price":2603333,"median_price":2500000},"Condo":{"count":7,"avg_price":1086000,"median_price":899000},"Townhouse":{"count":2,"avg_price":1487500,"median_price":1487500}},"listings":[{"listing_id":"24680123","property_address":"42 Elm St","city":"Toronto","state_or_province":"ON","postal_code":"M5G 1H5","listing_price":1125000,"property_type":"House","bedrooms":4,"bathrooms":3.0,"square_feet":1950,"price_per_sqft":576,"listing_date":"2026-02-22","days_on_market":5,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24680123/listing","image_url":null,"agent_name":"Sarah Chen","brokerage_name":"Royal LePage"},{"listing_id":"24681456","property_address":"810 King St W, Unit 305","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1N7","listing_price":699000,"property_type":"Condo","bedrooms":1,"bathrooms":1.0,"square_feet":560,"price_per_sqft":1248,"listing_date":"2026-02-15","days_on_market":12,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24681456/listing","image_url":null,"agent_name":"Michael Park","brokerage_name":"Sutton Group"},{"listing_id":"24682789","property_address":"55 Harbord St","city":"Toronto","state_or_province":"ON","postal_code":"M5S 1G4","listing_price":2250000,"property_type":"House","bedrooms":5,"bathrooms":4.5,"square_feet":3200,"price_per_sqft":703,"listing_date":"2026-02-24","days_on_market":3,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24682789/listing","image_url":null,"agent_name":"Linda Zhao","brokerage_name":"Sotheby's Realty"},{"listing_id":"24683012","property_address":"1200 Bay St, Unit 1802","city":"Toronto","state_or_province":"ON","postal_code":"M5R 2A5","listing_price":1480000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":1100,"price_per_sqft":1345,"listing_date":"2026-02-18","days_on_market":9,"listing_status":"Pending","listing_url":"https://www.realtor.ca/real-estate/24683012/listing","image_url":null,"agent_name":"David Kim","brokerage_name":"Bosley Real Estate"},{"listing_id":"24684345","property_address":"33 Roncesvalles Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6R 2K4","listing_price":1650000,"property_type":"Townhouse","bedrooms":3,"bathrooms":2.5,"square_feet":1780,"price_per_sqft":926,"listing_date":"2026-02-20","days_on_market":7,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24684345/listing","image_url":null,"agent_name":"Emma Walsh","brokerage_name":"Re/Max Hallmark"},{"listing_id":"24685678","property_address":"90 Broadview Ave, Unit 4A","city":"Toronto","state_or_province":"ON","postal_code":"M4M 2E4","listing_price":549000,"property_type":"Condo","bedrooms":1,"bathrooms":1.0,"square_feet":480,"price_per_sqft":1143,"listing_date":"2026-02-06","days_on_market":21,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24685678/listing","image_url":null,"agent_name":null,"brokerage_name":null},{"listing_id":"24686901","property_address":"175 Hanna Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6K 1X2","listing_price":3100000,"property_type":"House","bedrooms":6,"bathrooms":5.0,"square_feet":4400,"price_per_sqft":704,"listing_date":"2026-02-25","days_on_market":2,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24686901/listing","image_url":null,"agent_name":"James Osei","brokerage_name":"Chestnut Park Real Estate"},{"listing_id":"24687234","property_address":"222 Spadina Ave, Unit 907","city":"Toronto","state_or_province":"ON","postal_code":"M5T 3A5","listing_price":775000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":820,"price_per_sqft":945,"listing_date":"2026-02-12","days_on_market":15,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24687234/listing","image_url":null,"agent_name":"Priya Nair","brokerage_name":"Realty One"},{"listing_id":"24688567","property_address":"48 Ossington Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6J 2Y8","listing_price":1895000,"property_type":"House","bedrooms":4,"bathrooms":3.0,"square_feet":2100,"price_per_sqft":902,"listing_date":"2026-02-23","days_on_market":4,"listing_status":"Sold","listing_url":"https://www.realtor.ca/real-estate/24688567/listing","image_url":null,"agent_name":"Tom Bradley","brokerage_name":"Forest Hill Real Estate"},{"listing_id":"24689890","property_address":"300 Front St W, Unit 2210","city":"Toronto","state_or_province":"ON","postal_code":"M5V 0E9","listing_price":2050000,"property_type":"Condo","bedrooms":3,"bathrooms":3.0,"square_feet":1680,"price_per_sqft":1220,"listing_date":"2026-02-09","days_on_market":18,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24689890/listing","image_url":null,"agent_name":"Aisha Mohammed","brokerage_name":"Brad J. Lamb Realty"},{"listing_id":"24690123","property_address":"61 Fern Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6R 1K3","listing_price":1325000,"property_type":"Townhouse","bedrooms":3,"bathrooms":2.0,"square_feet":1450,"price_per_sqft":913,"listing_date":"2026-02-21","days_on_market":6,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24690123/listing","image_url":null,"agent_name":"Carlos Rivera","brokerage_name":"Century 21"},{"listing_id":"24691456","property_address":"88 Davenport Rd, Unit 301","city":"Toronto","state_or_province":"ON","postal_code":"M5R 1H8","listing_price":1150000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":1050,"price_per_sqft":1095,"listing_date":"2026-01-28","days_on_market":30,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24691456/listing","image_url":null,"agent_name":"Nancy Wu","brokerage_name":"Keller Williams"},{"listing_id":"24692789","property_address":"10 Niagara St","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1C4","listing_price":4500000,"property_type":"House","bedrooms":5,"bathrooms":6.0,"square_feet":5800,"price_per_sqft":775,"listing_date":"2026-02-26","days_on_market":1,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24692789/listing","image_url":null,"agent_name":"Victor Tran","brokerage_name":"Platinum Realty"},{"listing_id":"24693012","property_address":"450 Wellington St W, Unit 215","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1E3","listing_price":899000,"property_type":"Condo","bedrooms":1,"bathrooms":1.5,"square_feet":710,"price_per_sqft":1266,"listing_date":"2026-02-19","days_on_market":8,"listing_status":"Pending","listing_url":"https://www.realtor.ca/real-estate/24693012/listing","image_url":null,"agent_name":"Rita Singh","brokerage_name":"Cityscape Real Estate"},{"listing_id":"24694345","property_address":"27 Chester Hill Rd","city":"Toronto","state_or_province":"ON","postal_code":"M4K 1X5","listing_price":2750000,"property_type":"House","bedrooms":4,"bathrooms":4.0,"square_feet":3600,"price_per_sqft":763,"listing_date":"2026-02-16","days_on_market":11,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24694345/listing","image_url":null,"agent_name":"Paul Hennessey","brokerage_name":"Sage Real Estate"}]};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let LISTINGS = [];
+let filteredListings = [];
+let sortKey = null, sortDir = 1;
+let activeFilter = 'All';
+let chartInstances = {};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fmt  = (n) => n != null ? '$' + n.toLocaleString() : '—';
+const fmtK = (n) => n >= 1_000_000 ? '$' + (n/1_000_000).toFixed(2) + 'M' : '$' + (n/1_000).toFixed(0) + 'K';
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+function showLoading() {
+  const overlay = document.createElement('div');
+  overlay.id = 'loadingOverlay';
+  overlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(244,240,232,0.88);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:900; backdrop-filter:blur(6px);
+    font-family:'IBM Plex Mono',monospace;
+  `;
+  overlay.innerHTML = `
+    <div style="width:48px;height:48px;border:3px solid #c8b99a;border-top-color:#c1440e;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1.5rem;"></div>
+    <div style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:#7a7166;">Fetching live data…</div>
+    <div id="loadingSource" style="font-size:0.58rem;color:#c8b99a;margin-top:0.5rem;max-width:300px;text-align:center;word-break:break-all;"></div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('loadingSource').textContent = DATA_URL;
+}
+
+function hideLoading() {
+  const el = document.getElementById('loadingOverlay');
+  if (el) {
+    el.style.transition = 'opacity 0.3s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 300);
+  }
+}
+
+function showDataBanner(source, timestamp) {
+  const existing = document.getElementById('dataBanner');
+  if (existing) existing.remove();
+  const ts = timestamp ? new Date(timestamp).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' }) : 'unknown';
+  const banner = document.createElement('div');
+  banner.id = 'dataBanner';
+  banner.style.cssText = `
+    background:${source === 'live' ? '#2a6049' : '#856404'};
+    color:white; font-family:'IBM Plex Mono',monospace; font-size:0.62rem;
+    letter-spacing:0.1em; text-align:center; padding:0.4rem;
+  `;
+  banner.textContent = source === 'live'
+    ? `✓ LIVE DATA  ·  Last scraped: ${ts}  ·  Auto-refreshes daily via GitHub Actions`
+    : `⚠ DEMO DATA  ·  Could not reach GitHub — showing bundled sample data  ·  Deploy to GitHub Pages for live data`;
+  document.querySelector('header').insertAdjacentElement('afterend', banner);
+}
+
+// ── Data fetch with fallback ──────────────────────────────────────────────────
+async function loadData() {
+  showLoading();
+
+  // Don't try to fetch when running locally as file:// — use fallback immediately
+  const isLocal = window.location.protocol === 'file:';
+
+  if (!isLocal) {
+    try {
+      const res = await fetch(DATA_URL, { cache: 'no-cache' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      hideLoading();
+      showDataBanner('live', data.generated_at);
+      return data;
+    } catch (err) {
+      console.warn('Live fetch failed, using fallback data:', err.message);
+    }
+  }
+
+  hideLoading();
+  showDataBanner('fallback', FALLBACK_DATA.generated_at);
+  return FALLBACK_DATA;
+}
+
+// ── KPI header population ─────────────────────────────────────────────────────
+function populateKPIs(DATA) {
+  const p = DATA.pricing, v = DATA.velocity, inv = DATA.inventory, s = DATA.by_status;
+
+  // Avg list price
+  document.querySelector('.hero-kpi:nth-child(1) .hero-kpi-value').innerHTML =
+    `<span class="currency">$</span>${(p.avg_list_price/1_000_000).toFixed(2)}M`;
+  document.querySelector('.hero-kpi:nth-child(1) .hero-kpi-sub').textContent =
+    `Median ${fmtK(p.median_list_price)}`;
+
+  // $/sqft
+  document.querySelector('.hero-kpi:nth-child(2) .hero-kpi-value').innerHTML =
+    `<span class="currency">$</span>${p.avg_price_per_sqft}`;
+  document.querySelector('.hero-kpi:nth-child(2) .hero-kpi-sub').textContent =
+    `Median $${p.median_price_per_sqft}/sqft`;
+
+  // DOM
+  document.querySelector('.hero-kpi:nth-child(3) .hero-kpi-value').textContent = v.avg_days_on_market;
+  document.querySelector('.hero-kpi:nth-child(3) .hero-kpi-sub').textContent =
+    `Median ${v.median_days_on_market} days`;
+
+  // Listing counts
+  document.querySelector('.hero-kpi:nth-child(4) .hero-kpi-value').textContent = DATA.total_listings;
+  document.querySelector('.hero-kpi:nth-child(4) .hero-kpi-sub').textContent =
+    `${s.active} Active · ${s.pending} Pending · ${s.sold} Sold`;
+  document.querySelector('.hero-kpi:nth-child(4) .hero-kpi-delta').textContent =
+    `Supply ratio ${inv.supply_demand_ratio}`;
+
+  // Header signal badge
+  const badge = document.getElementById('signal-badge');
+  badge.textContent = inv.market_signal;
+  if (inv.market_signal === "Seller's Market") badge.style.cssText += 'background:rgba(42,96,73,0.2);border-color:#2a6049;color:#2a6049;';
+
+  // Header date
+  const ts = DATA.generated_at ? new Date(DATA.generated_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }) : '—';
+  document.querySelector('.header-meta > div > div:first-child').textContent = 'Toronto, ON';
+  document.querySelector('.header-meta > div > div:last-child').textContent = `Updated ${ts}`;
+}
+
+// ── Inventory bars ────────────────────────────────────────────────────────────
+function populateInventoryBars(DATA) {
+  const bt = DATA.by_type;
+  const types = ['House', 'Condo', 'Townhouse'];
+  const total = Object.values(bt).reduce((a, b) => a + b.count, 0);
+
+  const cards = document.querySelectorAll('.inv-card');
+  types.forEach((type, i) => {
+    const d = bt[type];
+    if (!d || !cards[i]) return;
+    const pct = Math.round((d.count / total) * 100);
+    cards[i].querySelector('.inv-card-value').innerHTML =
+      `${d.count} <span style="font-size:1rem;color:var(--muted);">listings</span>`;
+    cards[i].querySelector('.inv-bar-fill').dataset.width = pct;
+    cards[i].querySelectorAll('.inv-bar-legend span')[0].textContent = `Avg ${fmtK(d.avg_price)}`;
+    cards[i].querySelectorAll('.inv-bar-legend span')[1].textContent = `Median ${fmtK(d.median_price)}`;
+  });
+
+  // Filter button counts
+  const s = DATA.by_status;
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  filterBtns[0].textContent = `All (${DATA.total_listings})`;
+  filterBtns[1].textContent = `Active (${s.active})`;
+  filterBtns[2].textContent = `Pending (${s.pending})`;
+  filterBtns[3].textContent = `Sold (${s.sold})`;
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;">NO LISTINGS MATCH FILTER</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(l => {
+    const dom = l.days_on_market;
+    const domClass = dom <= 7 ? 'dom-fast' : dom <= 20 ? 'dom-medium' : 'dom-slow';
+    return `
+    <tr onclick='openModal(${JSON.stringify(l).replace(/'/g,"&#39;")})'>
+      <td class="listing-id-cell">${l.listing_id}</td>
+      <td>
+        <div style="font-weight:500;">${l.property_address}</div>
+        <div style="font-size:0.65rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;">${l.postal_code || ''}</div>
+      </td>
+      <td><span class="type-tag">${l.property_type}</span></td>
+      <td class="price-cell">${fmtK(l.listing_price)}</td>
+      <td class="ppsf-cell">${l.price_per_sqft != null ? '$'+l.price_per_sqft : '—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;">${l.bedrooms ?? '—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;">${l.bathrooms ?? '—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;">${l.square_feet != null ? l.square_feet.toLocaleString() : '—'}</td>
+      <td>
+        <div class="dom-indicator">
+          <span class="dom-dot ${domClass}"></span>
+          <span style="font-family:'IBM Plex Mono',monospace;">${dom != null ? dom + 'd' : '—'}</span>
+        </div>
+      </td>
+      <td><span class="status-pill status-${l.listing_status}">${l.listing_status}</span></td>
+      <td class="agent-cell">${l.agent_name || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable(key, btn) {
+  activeFilter = key;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function searchTable(query) { applyFilters(query); }
+
+function applyFilters(query) {
+  const q = (query !== undefined ? query : document.getElementById('searchInput').value).toLowerCase();
+  filteredListings = LISTINGS.filter(l => {
+    const matchFilter = activeFilter === 'All' || l.listing_status === activeFilter || l.property_type === activeFilter;
+    const matchSearch = !q || l.property_address.toLowerCase().includes(q) || (l.postal_code || '').toLowerCase().includes(q);
+    return matchFilter && matchSearch;
+  });
+  if (sortKey) {
+    filteredListings.sort((a, b) => {
+      const av = a[sortKey] ?? -Infinity, bv = b[sortKey] ?? -Infinity;
+      return av < bv ? -sortDir : av > bv ? sortDir : 0;
+    });
+  }
+  renderTable(filteredListings);
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = 1; }
+  document.querySelectorAll('.listings-table th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
+  const keys = ['listing_id','property_address','property_type','listing_price','price_per_sqft','bedrooms','bathrooms','square_feet','days_on_market','listing_status','agent_name'];
+  const idx = keys.indexOf(key);
+  if (idx >= 0) document.querySelectorAll('.listings-table th')[idx].classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+  applyFilters();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(l) {
+  document.getElementById('modal-price').textContent = fmtK(l.listing_price);
+  document.getElementById('modal-address').textContent = l.property_address;
+  document.getElementById('modal-city').textContent = `${l.city}, ${l.state_or_province}  ${l.postal_code || ''}`;
+  document.getElementById('modal-stats').innerHTML = [
+    ['Type', l.property_type], ['Status', l.listing_status],
+    ['Bedrooms', l.bedrooms ?? '—'], ['Bathrooms', l.bathrooms ?? '—'],
+    ['Square Feet', l.square_feet?.toLocaleString() ?? '—'],
+    ['$/sqft', l.price_per_sqft != null ? '$'+l.price_per_sqft : '—'],
+    ['Days on Market', l.days_on_market != null ? l.days_on_market + ' days' : '—'],
+    ['Listed', l.listing_date ?? '—'],
+    ['Agent', l.agent_name ?? '—'], ['Brokerage', l.brokerage_name ?? '—'],
+  ].map(([k,v]) => `<div class="modal-stat"><div class="modal-stat-label">${k}</div><div class="modal-stat-value">${v}</div></div>`).join('');
+  document.getElementById('modal-link').href = l.listing_url;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay') || e.currentTarget?.classList.contains('modal-close')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal({target: document.getElementById('modalOverlay')}); });
+
+// ── Charts ────────────────────────────────────────────────────────────────────
+const PALETTE = { red: '#c1440e', green: '#2a6049', blue: '#1a3a5c', gold: '#c9a84c', warm: '#c8b99a', muted: '#7a7166' };
+const globalFont = { family: "'IBM Plex Mono', monospace", size: 11 };
+Chart.defaults.font = globalFont;
+Chart.defaults.color = '#7a7166';
+
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+function buildCharts(DATA) {
+  const LISTINGS_LOCAL = DATA.listings;
+  const bt = DATA.by_type;
+  const types = Object.keys(bt);
+
+  // ── Price by type ──
+  destroyChart('priceByTypeChart');
+  chartInstances['priceByTypeChart'] = new Chart(document.getElementById('priceByTypeChart'), {
+    type: 'bar',
+    data: {
+      labels: types,
+      datasets: [
+        { label: 'Avg Price',    data: types.map(t => bt[t].avg_price),    backgroundColor: PALETTE.red  + 'cc', borderWidth: 0 },
+        { label: 'Median Price', data: types.map(t => bt[t].median_price), backgroundColor: PALETTE.blue + '99', borderWidth: 0 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom', labels: { font: globalFont, boxWidth: 12 } } },
+      scales: {
+        y: { ticks: { callback: v => '$' + (v/1_000_000).toFixed(1) + 'M', font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // ── Status donut ──
+  destroyChart('statusChart');
+  const s = DATA.by_status;
+  chartInstances['statusChart'] = new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Active', 'Pending', 'Sold'],
+      datasets: [{ data: [s.active, s.pending, s.sold], backgroundColor: [PALETTE.green, PALETTE.gold, PALETTE.red], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom', labels: { font: globalFont, boxWidth: 12 } } },
+      cutout: '65%'
+    }
+  });
+
+  // ── DOM histogram ──
+  destroyChart('domChart');
+  const doms = LISTINGS_LOCAL.map(l => l.days_on_market).filter(d => d != null);
+  const buckets = [0, 0, 0, 0, 0];
+  doms.forEach(d => {
+    if (d <= 3) buckets[0]++;
+    else if (d <= 7) buckets[1]++;
+    else if (d <= 14) buckets[2]++;
+    else if (d <= 21) buckets[3]++;
+    else buckets[4]++;
+  });
+  chartInstances['domChart'] = new Chart(document.getElementById('domChart'), {
+    type: 'bar',
+    data: {
+      labels: ['0–3d', '4–7d', '8–14d', '15–21d', '22d+'],
+      datasets: [{ data: buckets, backgroundColor: [PALETTE.green+'cc', PALETTE.green+'99', PALETTE.gold+'cc', PALETTE.red+'99', PALETTE.red+'cc'], borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { ticks: { stepSize: 1, font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+    }
+  });
+
+  // ── Scatter: Price vs Sqft ──
+  destroyChart('scatterChart');
+  const scatterColors = { House: PALETTE.red, Condo: PALETTE.blue, Townhouse: PALETTE.gold };
+  const scatterData = LISTINGS_LOCAL.filter(l => l.square_feet).map(l => ({ x: l.square_feet, y: l.listing_price / 1000, type: l.property_type }));
+  chartInstances['scatterChart'] = new Chart(document.getElementById('scatterChart'), {
+    type: 'scatter',
+    data: {
+      datasets: types.map(type => ({
+        label: type,
+        data: scatterData.filter(d => d.type === type).map(d => ({ x: d.x, y: d.y })),
+        backgroundColor: (scatterColors[type] || PALETTE.muted) + 'cc',
+        borderColor: scatterColors[type] || PALETTE.muted,
+        borderWidth: 1, pointRadius: 7, pointHoverRadius: 9,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: globalFont, boxWidth: 12 } } },
+      scales: {
+        x: { title: { display: true, text: 'Square Feet', font: globalFont }, ticks: { font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { title: { display: true, text: 'Price ($K)', font: globalFont }, ticks: { callback: v => '$' + v + 'K', font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } }
+      }
+    }
+  });
+
+  // ── PPSF by type ──
+  destroyChart('ppsfChart');
+  const ppsfByType = {};
+  LISTINGS_LOCAL.filter(l => l.price_per_sqft).forEach(l => {
+    if (!ppsfByType[l.property_type]) ppsfByType[l.property_type] = [];
+    ppsfByType[l.property_type].push(l.price_per_sqft);
+  });
+  const ppsfAvgs = Object.entries(ppsfByType).map(([k, v]) => ({
+    type: k, avg: Math.round(v.reduce((a,b) => a+b, 0) / v.length), min: Math.min(...v), max: Math.max(...v)
+  }));
+  chartInstances['ppsfChart'] = new Chart(document.getElementById('ppsfChart'), {
+    type: 'bar',
+    data: {
+      labels: ppsfAvgs.map(d => d.type),
+      datasets: [{ label: 'Avg $/sqft', data: ppsfAvgs.map(d => d.avg), backgroundColor: [PALETTE.red+'cc', PALETTE.blue+'cc', PALETTE.gold+'cc'], borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { afterLabel: (ctx) => { const d = ppsfAvgs[ctx.dataIndex]; return `Range: $${d.min} – $${d.max}`; } } }
+      },
+      scales: {
+        y: { ticks: { callback: v => '$' + v, font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+async function init() {
+  const DATA = await loadData();
+
+  LISTINGS = DATA.listings;
+  filteredListings = [...LISTINGS];
+
+  populateKPIs(DATA);
+  populateInventoryBars(DATA);
+  buildCharts(DATA);
+  renderTable(LISTINGS);
+
+  // Animate inventory bars after a short delay
+  setTimeout(() => {
+    document.querySelectorAll('.inv-bar-fill').forEach(el => {
+      el.style.width = el.dataset.width + '%';
+    });
+  }, 400);
+}
+
+init();
+</script>
+</body>
+</html>
