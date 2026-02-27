@@ -3,762 +3,942 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RE:PULSE — Real Estate Market Intelligence</title>
+<title>RE:PULSE — Canadian Market Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --ink: #0a0a0f;
-    --paper: #f4f0e8;
-    --cream: #ede8d8;
-    --warm: #c8b99a;
-    --accent: #c1440e;
-    --accent2: #2a6049;
-    --accent3: #1a3a5c;
-    --gold: #c9a84c;
-    --muted: #7a7166;
-    --card-bg: rgba(255,255,255,0.55);
-    --border: rgba(10,10,15,0.12);
-    --shadow: 0 2px 24px rgba(10,10,15,0.08);
-  }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─────────────────────────────────────────────────────────────────────────────
+   TOKENS
+───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #f5f5f7;
+  --surface:     #ffffff;
+  --surface-2:   #fafafa;
+  --border:      rgba(0,0,0,0.07);
+  --border-strong: rgba(0,0,0,0.13);
+  --ink:         #1d1d1f;
+  --ink-2:       #424245;
+  --ink-3:       #6e6e73;
+  --ink-4:       #aeaeb2;
+  --blue:        #0071e3;
+  --blue-light:  rgba(0,113,227,0.08);
+  --blue-mid:    rgba(0,113,227,0.15);
+  --green:       #1d8348;
+  --green-light: rgba(29,131,72,0.08);
+  --amber:       #b45309;
+  --amber-light: rgba(180,83,9,0.08);
+  --red:         #d73027;
+  --red-light:   rgba(215,48,39,0.08);
+  --radius-sm:   10px;
+  --radius:      16px;
+  --radius-lg:   20px;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:      0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --font:        'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono:        'DM Mono', ui-monospace, monospace;
+  --nav-h:       52px;
+}
 
-  html { scroll-behavior: smooth; }
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.5;
+}
 
-  body {
-    font-family: 'IBM Plex Sans', sans-serif;
-    background: var(--paper);
-    color: var(--ink);
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   NAV BAR  —  frosted glass, exactly like macOS menubar
+───────────────────────────────────────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: var(--nav-h);
+  background: rgba(245,245,247,0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 32px;
+}
 
-  /* Noise texture overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.4;
-  }
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
 
-  /* ── Header ────────────────────────────────────────────── */
-  header {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 0 3rem;
-    display: flex;
-    align-items: stretch;
-    justify-content: space-between;
-    border-bottom: 3px solid var(--accent);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+.nav-logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--ink);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .header-brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.1rem 0;
-  }
+.nav-logo-mark svg {
+  width: 15px;
+  height: 15px;
+  fill: white;
+}
 
-  .brand-mark {
-    width: 38px;
-    height: 38px;
-    background: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Playfair Display', serif;
-    font-weight: 900;
-    font-size: 1.1rem;
-    color: white;
-    flex-shrink: 0;
-  }
+.nav-logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
 
-  .brand-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-  }
-  .brand-text span {
-    color: var(--accent);
-  }
+.nav-separator {
+  width: 1px;
+  height: 18px;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
 
-  .brand-sub {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--warm);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-top: 1px;
-  }
+.nav-city {
+  font-size: 13px;
+  color: var(--ink-3);
+  flex: 1;
+}
 
-  .header-meta {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--warm);
-    letter-spacing: 0.08em;
-  }
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
 
-  .market-signal-badge {
-    padding: 0.4rem 1rem;
-    background: rgba(193,68,14,0.2);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 500;
-  }
+.signal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 100px;
+  letter-spacing: 0;
+}
+.signal-chip.buyers  { background: var(--blue-light);  color: var(--blue); }
+.signal-chip.sellers { background: var(--green-light); color: var(--green); }
+.signal-chip.balanced{ background: var(--amber-light); color: var(--amber); }
+.signal-chip::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
 
-  /* ── Hero Strip ─────────────────────────────────────────── */
-  .hero-strip {
-    background: linear-gradient(135deg, var(--ink) 0%, #1a1a2e 50%, #0f2027 100%);
-    padding: 3rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    position: relative;
-    overflow: hidden;
-  }
+.nav-updated {
+  font-size: 12px;
+  color: var(--ink-4);
+  font-family: var(--mono);
+}
 
-  .hero-strip::before {
-    content: 'TORONTO RE MARKET';
-    position: absolute;
-    bottom: -1rem;
-    right: 2rem;
-    font-family: 'Playfair Display', serif;
-    font-size: 6rem;
-    font-weight: 900;
-    color: rgba(255,255,255,0.03);
-    letter-spacing: -0.02em;
-    pointer-events: none;
-    white-space: nowrap;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   DATA BANNER  (live / demo)
+───────────────────────────────────────────────────────────────────────────── */
+#dataBanner {
+  font-size: 12px;
+  font-family: var(--mono);
+  text-align: center;
+  padding: 7px 16px;
+  letter-spacing: 0.02em;
+}
 
-  .hero-kpi {
-    padding: 0 2.5rem;
-    border-right: 1px solid rgba(255,255,255,0.1);
-    animation: fadeSlideUp 0.6s ease both;
-  }
-  .hero-kpi:nth-child(1) { animation-delay: 0.05s; padding-left: 0; }
-  .hero-kpi:nth-child(2) { animation-delay: 0.15s; }
-  .hero-kpi:nth-child(3) { animation-delay: 0.25s; }
-  .hero-kpi:last-child { animation-delay: 0.35s; border-right: none; }
+/* ─────────────────────────────────────────────────────────────────────────────
+   PAGE WRAPPER
+───────────────────────────────────────────────────────────────────────────── */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
 
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   HERO  —  large KPI metrics, Apple style
+───────────────────────────────────────────────────────────────────────────── */
+.hero {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 48px;
+}
 
-  .hero-kpi-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--warm);
-    margin-bottom: 0.6rem;
-  }
+.kpi {
+  background: var(--surface);
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  animation: kpi-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.kpi:nth-child(1) { animation-delay: 0.05s; }
+.kpi:nth-child(2) { animation-delay: 0.10s; }
+.kpi:nth-child(3) { animation-delay: 0.15s; }
+.kpi:nth-child(4) { animation-delay: 0.20s; }
 
-  .hero-kpi-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.6rem;
-    font-weight: 700;
-    color: white;
-    line-height: 1;
-    letter-spacing: -0.01em;
-  }
+@keyframes kpi-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  .hero-kpi-value .currency {
-    font-size: 1.2rem;
-    vertical-align: super;
-    color: var(--warm);
-  }
+.kpi-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.01em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
 
-  .hero-kpi-sub {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    margin-top: 0.4rem;
-  }
+.kpi-value {
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 8px;
+}
 
-  .hero-kpi-delta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    margin-top: 0.5rem;
-  }
-  .delta-up { color: #4caf8a; }
-  .delta-down { color: var(--accent); }
+.kpi-value .unit {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink-3);
+  vertical-align: baseline;
+  margin-right: 1px;
+}
 
-  /* ── Main layout ──────────────────────────────────────── */
-  .main {
-    padding: 2.5rem 3rem;
-    max-width: 1600px;
-    margin: 0 auto;
-  }
+.kpi-sub {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
 
-  .section-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+.kpi-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--mono);
+}
+.kpi-delta.up   { color: var(--green); }
+.kpi-delta.down { color: var(--red); }
+.kpi-delta.flat { color: var(--ink-4); }
 
-  /* ── Charts grid ──────────────────────────────────────── */
-  .charts-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   SECTION HEADER
+───────────────────────────────────────────────────────────────────────────── */
+.section-header {
+  margin-bottom: 16px;
+  margin-top: 48px;
+}
 
-  .chart-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
-    backdrop-filter: blur(4px);
-    position: relative;
-    overflow: hidden;
-    animation: fadeSlideUp 0.5s ease both;
-  }
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
 
-  .chart-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-  }
-  .chart-card.accent-red::before { background: var(--accent); }
-  .chart-card.accent-green::before { background: var(--accent2); }
-  .chart-card.accent-blue::before { background: var(--accent3); }
-  .chart-card.accent-gold::before { background: var(--gold); }
+.section-sub {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
 
-  .chart-card-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 0.3rem;
-  }
-  .chart-card-subtitle {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   CARD  —  the universal container
+───────────────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
 
-  .chart-wrap {
-    position: relative;
-    width: 100%;
-  }
+.card-header {
+  padding: 20px 22px 0;
+}
 
-  /* ── Inventory bar cards ─────────────────────────────── */
-  .inventory-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-  }
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
 
-  .inv-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
-    animation: fadeSlideUp 0.5s ease both;
-  }
+.card-subtitle {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
 
-  .inv-card-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.5rem;
-  }
+.card-body {
+  padding: 16px 22px 20px;
+}
 
-  .inv-card-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   CHARTS GRID  —  first row 2-1-1, second row 1-1
+───────────────────────────────────────────────────────────────────────────── */
+.charts-grid-a {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
 
-  .inv-bar-track {
-    height: 6px;
-    background: var(--cream);
-    border-radius: 0;
-    overflow: hidden;
-    margin-bottom: 0.4rem;
-  }
-  .inv-bar-fill {
-    height: 100%;
-    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-    width: 0;
-  }
+.charts-grid-b {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
 
-  .inv-bar-legend {
-    display: flex;
-    justify-content: space-between;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.58rem;
-    color: var(--muted);
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   INVENTORY STRIP  —  3 cards inline
+───────────────────────────────────────────────────────────────────────────── */
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 0;
+}
 
-  /* ── Listings table ───────────────────────────────────── */
-  .listings-section { margin-bottom: 3rem; }
+.inv-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 22px 22px 20px;
+  box-shadow: var(--shadow-sm);
+}
 
-  .table-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
+.inv-label {
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
 
-  .filter-group {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
+.inv-count {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 14px;
+}
 
-  .filter-btn {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.4rem 1rem;
-    border: 1px solid var(--border);
-    background: transparent;
-    cursor: pointer;
-    color: var(--muted);
-    transition: all 0.15s;
-  }
-  .filter-btn:hover, .filter-btn.active {
-    background: var(--ink);
-    color: var(--paper);
-    border-color: var(--ink);
-  }
+.inv-count span {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-3);
+  margin-left: 4px;
+}
 
-  .search-box {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    padding: 0.4rem 0.9rem;
-    border: 1px solid var(--border);
-    background: white;
-    color: var(--ink);
-    outline: none;
-    width: 220px;
-  }
-  .search-box:focus { border-color: var(--accent); }
+.inv-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
 
-  .listings-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    font-size: 0.78rem;
-  }
+.inv-fill {
+  height: 100%;
+  border-radius: 100px;
+  width: 0;
+  transition: width 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.inv-fill.blue  { background: var(--blue); }
+.inv-fill.green { background: var(--green); }
+.inv-fill.amber { background: var(--amber); }
 
-  .listings-table thead {
-    background: var(--ink);
-    color: var(--paper);
-  }
+.inv-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-family: var(--mono);
+}
 
-  .listings-table th {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 0.9rem 1rem;
-    text-align: left;
-    font-weight: 500;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-  }
-  .listings-table th:hover { background: rgba(255,255,255,0.08); }
-  .listings-table th.sort-asc::after { content: ' ↑'; }
-  .listings-table th.sort-desc::after { content: ' ↓'; }
+/* ─────────────────────────────────────────────────────────────────────────────
+   LISTINGS TABLE
+───────────────────────────────────────────────────────────────────────────── */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
 
-  .listings-table td {
-    padding: 0.8rem 1rem;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-    font-family: 'IBM Plex Sans', sans-serif;
-  }
+.filter-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 
-  .listings-table tbody tr {
-    transition: background 0.1s;
-    cursor: pointer;
-  }
-  .listings-table tbody tr:hover { background: rgba(193,68,14,0.04); }
-  .listings-table tbody tr:last-child td { border-bottom: none; }
+.filter-btn {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 450;
+  padding: 5px 13px;
+  border-radius: 100px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: -0.01em;
+}
+.filter-btn:hover  { background: var(--bg); border-color: var(--ink-3); }
+.filter-btn.active {
+  background: var(--ink);
+  color: white;
+  border-color: transparent;
+}
 
-  .status-pill {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.58rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-  .status-Active { background: #d4edda; color: #155724; }
-  .status-Pending { background: #fff3cd; color: #856404; }
-  .status-Sold { background: #f8d7da; color: #721c24; }
+.search-wrap {
+  position: relative;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  stroke: var(--ink-4);
+  pointer-events: none;
+}
+.search-input {
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 6px 12px 6px 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  outline: none;
+  width: 200px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-light);
+}
+.search-input::placeholder { color: var(--ink-4); }
 
-  .type-tag {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
+.table-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
 
-  .price-cell {
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 500;
-    color: var(--ink);
-  }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-  .ppsf-cell {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
+thead tr {
+  border-bottom: 1px solid var(--border);
+}
 
-  .dom-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-  }
-  .dom-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .dom-fast { background: #4caf8a; }
-  .dom-medium { background: var(--gold); }
-  .dom-slow { background: var(--accent); }
+th {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  background: var(--surface-2);
+}
+th:hover { color: var(--ink); }
+th.sort-asc::after  { content: ' ↑'; color: var(--blue); }
+th.sort-desc::after { content: ' ↓'; color: var(--blue); }
 
-  .listing-id-cell {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-  }
+td {
+  padding: 13px 16px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--ink);
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+tbody tr:hover { background: var(--bg); }
 
-  .agent-cell {
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
+.td-address-main  { font-weight: 500; font-size: 13.5px; }
+.td-address-postal{ font-size: 11.5px; color: var(--ink-4); font-family: var(--mono); margin-top: 1px; }
+.td-price  { font-weight: 600; letter-spacing: -0.01em; }
+.td-ppsf   { font-family: var(--mono); font-size: 12.5px; color: var(--ink-3); }
+.td-num    { font-family: var(--mono); font-size: 12.5px; }
+.td-id     { font-family: var(--mono); font-size: 11px; color: var(--ink-4); }
+.td-agent  { font-size: 12.5px; color: var(--ink-3); }
 
-  /* ── Footer ───────────────────────────────────────────── */
-  footer {
-    background: var(--ink);
-    color: var(--warm);
-    padding: 1.5rem 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    border-top: 3px solid var(--accent);
-  }
+.type-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--mono);
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+}
 
-  .footer-note {
-    color: var(--muted);
-    max-width: 500px;
-    line-height: 1.6;
-  }
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 100px;
+  letter-spacing: 0;
+}
+.status-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-Active   { background: var(--green-light); color: var(--green); }
+.status-Pending  { background: var(--amber-light); color: var(--amber); }
+.status-Sold     { background: var(--red-light);   color: var(--red);   }
 
-  /* ── Modal ────────────────────────────────────────────── */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(10,10,15,0.7);
-    z-index: 500;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.2s ease;
-  }
-  .modal-overlay.open { display: flex; }
+.dom-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.dom-bar-bg {
+  width: 36px; height: 3px;
+  background: var(--border);
+  border-radius: 100px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.dom-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+}
+.dom-fast   .dom-bar-fill { background: var(--green); }
+.dom-medium .dom-bar-fill { background: var(--amber); }
+.dom-slow   .dom-bar-fill { background: var(--red);   }
 
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.no-results {
+  text-align: center;
+  padding: 48px;
+  color: var(--ink-4);
+  font-size: 13px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
 
-  .modal {
-    background: var(--paper);
-    border: 2px solid var(--ink);
-    padding: 2rem;
-    max-width: 520px;
-    width: 90%;
-    position: relative;
-    animation: fadeSlideUp 0.25s ease;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   MODAL  —  slide-up sheet, iOS style
+───────────────────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 500;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+@media (min-width: 600px) {
+  .modal-overlay { align-items: center; padding: 24px; }
+}
+.modal-overlay.open { display: flex; animation: overlay-in 0.2s ease; }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
 
-  .modal-close {
-    position: absolute;
-    top: 1rem; right: 1rem;
-    background: none; border: none;
-    font-size: 1.2rem; cursor: pointer;
-    color: var(--muted);
-  }
+.modal {
+  background: var(--surface);
+  width: 100%;
+  max-width: 460px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 28px 28px 36px;
+  position: relative;
+  animation: sheet-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-lg);
+}
+@media (min-width: 600px) {
+  .modal { border-radius: var(--radius-lg); }
+}
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  .modal-price {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 0.3rem;
-  }
+.modal-handle {
+  width: 32px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 100px;
+  margin: 0 auto 20px;
+  display: block;
+}
+@media (min-width: 600px) { .modal-handle { display: none; } }
 
-  .modal-address {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
-    font-weight: 500;
-  }
+.modal-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-3);
+  font-size: 14px;
+  transition: background 0.15s;
+}
+.modal-close:hover { background: var(--border); color: var(--ink); }
 
-  .modal-city {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin-bottom: 1.5rem;
-  }
+.modal-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
 
-  .modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
+.modal-price {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1;
+}
 
-  .modal-stat { }
-  .modal-stat-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    margin-bottom: 0.2rem;
-  }
-  .modal-stat-value {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
+.modal-address { font-size: 16px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.modal-city    { font-size: 13px; color: var(--ink-3); margin-bottom: 22px; font-family: var(--mono); }
 
-  .modal-link {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.6rem 1.2rem;
-    background: var(--ink);
-    color: var(--paper);
-    text-decoration: none;
-    transition: background 0.15s;
-  }
-  .modal-link:hover { background: var(--accent); }
+.modal-divider { height: 1px; background: var(--border); margin: 0 0 20px; }
 
-  /* ── Responsive ───────────────────────────────────────── */
-  @media (max-width: 1200px) {
-    .charts-grid { grid-template-columns: 1fr 1fr; }
-    .charts-grid .chart-card:first-child { grid-column: span 2; }
-  }
-  @media (max-width: 900px) {
-    .hero-strip { grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .charts-grid { grid-template-columns: 1fr; }
-    .charts-grid .chart-card:first-child { grid-column: span 1; }
-    .inventory-grid { grid-template-columns: 1fr; }
-    .main { padding: 1.5rem; }
-    header { padding: 0 1.5rem; }
-    .hero-strip { padding: 2rem 1.5rem; }
-  }
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.modal-stat-label {
+  font-size: 11px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: 2px;
+}
+.modal-stat-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.modal-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: white;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: -0.01em;
+}
+.modal-cta:hover  { background: #3a3a3c; }
+.modal-cta:active { transform: scale(0.98); }
+.modal-cta svg { width: 14px; height: 14px; stroke: white; fill: none; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.footer-brand { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.footer-legal { font-size: 12px; color: var(--ink-4); max-width: 520px; line-height: 1.6; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LOADING OVERLAY
+───────────────────────────────────────────────────────────────────────────── */
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.loading-spinner {
+  width: 36px; height: 36px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-label {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--ink-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.loading-url {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--ink-4);
+  max-width: 320px;
+  text-align: center;
+  word-break: break-all;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero { grid-template-columns: repeat(2, 1fr); }
+  .charts-grid-a { grid-template-columns: 1fr 1fr; }
+  .charts-grid-a .card:first-child { grid-column: span 2; }
+}
+@media (max-width: 720px) {
+  .page { padding: 24px 16px 60px; }
+  nav { padding: 0 16px; }
+  .hero { grid-template-columns: 1fr 1fr; }
+  .charts-grid-a,
+  .charts-grid-b  { grid-template-columns: 1fr; }
+  .charts-grid-a .card:first-child { grid-column: span 1; }
+  .inventory-grid { grid-template-columns: 1fr; }
+  .table-toolbar  { flex-direction: column; align-items: stretch; }
+  .search-input   { width: 100%; }
+  footer          { flex-direction: column; }
+}
 </style>
 </head>
 <body>
 
-<!-- ── Header ─────────────────────────────────────────────────── -->
-<header>
-  <div class="header-brand">
-    <div class="brand-mark">R</div>
-    <div>
-      <div class="brand-text">RE<span>:</span>PULSE</div>
-      <div class="brand-sub">Real Estate Market Intelligence</div>
+<!-- ─── NAV ───────────────────────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/>
+      </svg>
     </div>
+    <span class="nav-logo-text">RE:PULSE</span>
+  </a>
+  <div class="nav-separator"></div>
+  <span class="nav-city" id="nav-city">Canadian Market Intelligence</span>
+  <div class="nav-right">
+    <span class="signal-chip buyers" id="signal-badge">Buyer's Market</span>
+    <span class="nav-updated" id="nav-updated">—</span>
   </div>
-  <div class="header-meta">
-    <div>
-      <div style="color: var(--paper); font-size: 0.75rem; margin-bottom: 2px;">Toronto, ON</div>
-      <div>Updated Feb 27, 2026</div>
+</nav>
+
+<!-- ─── PAGE ──────────────────────────────────────────────────────────────── -->
+<div class="page">
+
+  <!-- Hero KPIs -->
+  <div class="hero">
+    <div class="kpi">
+      <div class="kpi-label">Avg List Price</div>
+      <div class="kpi-value hero-kpi-value"><span class="unit">$</span>1.75M</div>
+      <div class="kpi-sub hero-kpi-sub">Median $1.48M</div>
+      <div class="kpi-delta up hero-kpi-delta">↑ 2.4% vs last month</div>
     </div>
-    <div class="market-signal-badge" id="signal-badge">Buyer's Market</div>
-  </div>
-</header>
-
-<!-- ── Hero KPIs ──────────────────────────────────────────────── -->
-<div class="hero-strip">
-  <div class="hero-kpi">
-    <div class="hero-kpi-label">Avg List Price</div>
-    <div class="hero-kpi-value"><span class="currency">$</span>1.75M</div>
-    <div class="hero-kpi-sub">Median $1.48M</div>
-    <div class="hero-kpi-delta delta-up">▲ 2.4% vs last month</div>
-  </div>
-  <div class="hero-kpi">
-    <div class="hero-kpi-label">Avg $/sqft</div>
-    <div class="hero-kpi-value"><span class="currency">$</span>968</div>
-    <div class="hero-kpi-sub">Median $926/sqft</div>
-    <div class="hero-kpi-delta delta-down">▼ 1.1% vs last month</div>
-  </div>
-  <div class="hero-kpi">
-    <div class="hero-kpi-label">Avg Days on Market</div>
-    <div class="hero-kpi-value">10.1</div>
-    <div class="hero-kpi-sub">Median 8 days</div>
-    <div class="hero-kpi-delta delta-down">▼ 3.2 days vs last month</div>
-  </div>
-  <div class="hero-kpi">
-    <div class="hero-kpi-label">Active Listings</div>
-    <div class="hero-kpi-value">15</div>
-    <div class="hero-kpi-sub">12 Active · 2 Pending · 1 Sold</div>
-    <div class="hero-kpi-delta" style="color: var(--warm);">Supply ratio 4.0</div>
-  </div>
-</div>
-
-<!-- ── Main ───────────────────────────────────────────────────── -->
-<main class="main">
-
-  <!-- Charts row -->
-  <div class="section-label">Market Analytics</div>
-  <div class="charts-grid" style="margin-bottom: 2.5rem;">
-
-    <!-- Price by type bar chart -->
-    <div class="chart-card accent-red" style="animation-delay: 0.1s;">
-      <div class="chart-card-title">Price by Property Type</div>
-      <div class="chart-card-subtitle">Avg vs Median list price</div>
-      <div class="chart-wrap"><canvas id="priceByTypeChart" height="160"></canvas></div>
+    <div class="kpi">
+      <div class="kpi-label">Avg $/sqft</div>
+      <div class="kpi-value hero-kpi-value"><span class="unit">$</span>968</div>
+      <div class="kpi-sub hero-kpi-sub">Median $926/sqft</div>
+      <div class="kpi-delta down hero-kpi-delta">↓ 1.1% vs last month</div>
     </div>
-
-    <!-- Status donut -->
-    <div class="chart-card accent-blue" style="animation-delay: 0.2s;">
-      <div class="chart-card-title">Listing Status</div>
-      <div class="chart-card-subtitle">Distribution</div>
-      <div class="chart-wrap"><canvas id="statusChart" height="160"></canvas></div>
+    <div class="kpi">
+      <div class="kpi-label">Avg Days on Market</div>
+      <div class="kpi-value hero-kpi-value">10.1</div>
+      <div class="kpi-sub hero-kpi-sub">Median 8 days</div>
+      <div class="kpi-delta down hero-kpi-delta">↓ 3.2 days</div>
     </div>
-
-    <!-- DOM histogram -->
-    <div class="chart-card accent-gold" style="animation-delay: 0.3s;">
-      <div class="chart-card-title">Days on Market</div>
-      <div class="chart-card-subtitle">Distribution</div>
-      <div class="chart-wrap"><canvas id="domChart" height="160"></canvas></div>
-    </div>
-
-  </div>
-
-  <!-- Second chart row -->
-  <div class="charts-grid" style="margin-bottom: 2.5rem; grid-template-columns: 1fr 1fr;">
-
-    <!-- Price scatter -->
-    <div class="chart-card accent-green" style="animation-delay: 0.4s;">
-      <div class="chart-card-title">Price vs Square Footage</div>
-      <div class="chart-card-subtitle">Each point = one listing</div>
-      <div class="chart-wrap"><canvas id="scatterChart" height="180"></canvas></div>
-    </div>
-
-    <!-- PPSF by type -->
-    <div class="chart-card accent-red" style="animation-delay: 0.5s;">
-      <div class="chart-card-title">Price / Sqft by Type</div>
-      <div class="chart-card-subtitle">Spread analysis</div>
-      <div class="chart-wrap"><canvas id="ppsfChart" height="180"></canvas></div>
-    </div>
-
-  </div>
-
-  <!-- Inventory summary bars -->
-  <div class="section-label">Inventory Breakdown</div>
-  <div class="inventory-grid">
-    <div class="inv-card" style="animation-delay: 0.1s;">
-      <div class="inv-card-label">Houses</div>
-      <div class="inv-card-value">6 <span style="font-size:1rem; color:var(--muted);">listings</span></div>
-      <div class="inv-bar-track"><div class="inv-bar-fill" style="background: var(--accent);" data-width="40"></div></div>
-      <div class="inv-bar-legend"><span>Avg $2.60M</span><span>Median $2.50M</span></div>
-    </div>
-    <div class="inv-card" style="animation-delay: 0.2s;">
-      <div class="inv-card-label">Condos</div>
-      <div class="inv-card-value">7 <span style="font-size:1rem; color:var(--muted);">listings</span></div>
-      <div class="inv-bar-track"><div class="inv-bar-fill" style="background: var(--accent3);" data-width="47"></div></div>
-      <div class="inv-bar-legend"><span>Avg $1.09M</span><span>Median $899K</span></div>
-    </div>
-    <div class="inv-card" style="animation-delay: 0.3s;">
-      <div class="inv-card-label">Townhouses</div>
-      <div class="inv-card-value">2 <span style="font-size:1rem; color:var(--muted);">listings</span></div>
-      <div class="inv-bar-track"><div class="inv-bar-fill" style="background: var(--gold);" data-width="13"></div></div>
-      <div class="inv-bar-legend"><span>Avg $1.49M</span><span>Median $1.49M</span></div>
+    <div class="kpi">
+      <div class="kpi-label">Active Listings</div>
+      <div class="kpi-value hero-kpi-value">15</div>
+      <div class="kpi-sub hero-kpi-sub">12 Active · 2 Pending · 1 Sold</div>
+      <div class="kpi-delta flat hero-kpi-delta">Supply ratio 4.0</div>
     </div>
   </div>
 
-  <!-- Listings Table -->
-  <div class="listings-section">
-    <div class="section-label">All Listings</div>
+  <!-- Analytics header -->
+  <div class="section-header">
+    <div class="section-title">Market Analytics</div>
+    <div class="section-sub">Pricing, velocity, and inventory breakdown</div>
+  </div>
 
-    <div class="table-controls">
-      <div class="filter-group">
-        <button class="filter-btn active" onclick="filterTable('All', this)">All (15)</button>
-        <button class="filter-btn" onclick="filterTable('Active', this)">Active (12)</button>
-        <button class="filter-btn" onclick="filterTable('Pending', this)">Pending (2)</button>
-        <button class="filter-btn" onclick="filterTable('Sold', this)">Sold (1)</button>
-        <button class="filter-btn" onclick="filterTable('House', this)">Houses</button>
-        <button class="filter-btn" onclick="filterTable('Condo', this)">Condos</button>
-        <button class="filter-btn" onclick="filterTable('Townhouse', this)">Townhouses</button>
+  <!-- Charts row A -->
+  <div class="charts-grid-a" style="margin-bottom:12px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Price by Property Type</div>
+        <div class="card-subtitle">Avg vs Median list price</div>
       </div>
-      <input type="text" class="search-box" placeholder="Search address…" id="searchInput" oninput="searchTable(this.value)">
+      <div class="card-body"><canvas id="priceByTypeChart" height="148"></canvas></div>
     </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Listing Status</div>
+        <div class="card-subtitle">Distribution</div>
+      </div>
+      <div class="card-body"><canvas id="statusChart" height="148"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Days on Market</div>
+        <div class="card-subtitle">Distribution buckets</div>
+      </div>
+      <div class="card-body"><canvas id="domChart" height="148"></canvas></div>
+    </div>
+  </div>
 
-    <table class="listings-table" id="listingsTable">
+  <!-- Charts row B -->
+  <div class="charts-grid-b" style="margin-bottom:48px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Price vs Square Footage</div>
+        <div class="card-subtitle">Each point is one listing</div>
+      </div>
+      <div class="card-body"><canvas id="scatterChart" height="180"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Price / sqft by Type</div>
+        <div class="card-subtitle">Range and average</div>
+      </div>
+      <div class="card-body"><canvas id="ppsfChart" height="180"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Inventory -->
+  <div class="section-header" style="margin-top:0;">
+    <div class="section-title">Inventory Breakdown</div>
+    <div class="section-sub">Listing count and pricing by property category</div>
+  </div>
+
+  <div class="inventory-grid" style="margin-bottom:48px;">
+    <div class="inv-card">
+      <div class="inv-label">Houses</div>
+      <div class="inv-count inv-card-value">6 <span>listings</span></div>
+      <div class="inv-track"><div class="inv-fill blue inv-bar-fill" data-width="40"></div></div>
+      <div class="inv-meta"><span class="inv-bar-legend-avg">Avg $2.60M</span><span class="inv-bar-legend-med">Median $2.50M</span></div>
+    </div>
+    <div class="inv-card">
+      <div class="inv-label">Condos</div>
+      <div class="inv-count inv-card-value">7 <span>listings</span></div>
+      <div class="inv-track"><div class="inv-fill green inv-bar-fill" data-width="47"></div></div>
+      <div class="inv-meta"><span class="inv-bar-legend-avg">Avg $1.09M</span><span class="inv-bar-legend-med">Median $899K</span></div>
+    </div>
+    <div class="inv-card">
+      <div class="inv-label">Townhouses</div>
+      <div class="inv-count inv-card-value">2 <span>listings</span></div>
+      <div class="inv-track"><div class="inv-fill amber inv-bar-fill" data-width="13"></div></div>
+      <div class="inv-meta"><span class="inv-bar-legend-avg">Avg $1.49M</span><span class="inv-bar-legend-med">Median $1.49M</span></div>
+    </div>
+  </div>
+
+  <!-- Listings table -->
+  <div class="section-header" style="margin-top:0;">
+    <div class="section-title">All Listings</div>
+    <div class="section-sub">Click any row for full details</div>
+  </div>
+
+  <div class="table-toolbar">
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterTable('All', this)">All (15)</button>
+      <button class="filter-btn" onclick="filterTable('Active', this)">Active (12)</button>
+      <button class="filter-btn" onclick="filterTable('Pending', this)">Pending (2)</button>
+      <button class="filter-btn" onclick="filterTable('Sold', this)">Sold (1)</button>
+      <button class="filter-btn" onclick="filterTable('House', this)">Houses</button>
+      <button class="filter-btn" onclick="filterTable('Condo', this)">Condos</button>
+      <button class="filter-btn" onclick="filterTable('Townhouse', this)">Townhouses</button>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="search-input" type="text" id="searchInput" placeholder="Search address…" oninput="searchTable(this.value)">
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table id="listingsTable">
       <thead>
         <tr>
           <th onclick="sortTable('listing_id')">ID</th>
           <th onclick="sortTable('property_address')">Address</th>
           <th onclick="sortTable('property_type')">Type</th>
-          <th onclick="sortTable('listing_price')">List Price</th>
+          <th onclick="sortTable('listing_price')">Price</th>
           <th onclick="sortTable('price_per_sqft')">$/sqft</th>
           <th onclick="sortTable('bedrooms')">Bed</th>
           <th onclick="sortTable('bathrooms')">Bath</th>
-          <th onclick="sortTable('square_feet')">Sqft</th>
+          <th onclick="sortTable('square_feet')">sqft</th>
           <th onclick="sortTable('days_on_market')">DOM</th>
           <th onclick="sortTable('listing_status')">Status</th>
           <th onclick="sortTable('agent_name')">Agent</th>
@@ -768,37 +948,45 @@
     </table>
   </div>
 
-</main>
+</div><!-- /page -->
 
-<!-- ── Footer ────────────────────────────────────────────────── -->
+<!-- ─── FOOTER ────────────────────────────────────────────────────────────── -->
 <footer>
-  <div>RE:PULSE v1.0 · Real Estate Market Intelligence</div>
-  <div class="footer-note">
-    Data sourced from publicly available listings. Scraper respects robots.txt and ToS. For informational purposes only. Not financial or real estate advice.
-  </div>
+  <span class="footer-brand">RE:PULSE — Canadian Market Intelligence</span>
+  <span class="footer-legal">Data sourced from publicly available listings (Realtor.ca, Kijiji, Point2Homes). Respects robots.txt and applicable ToS. For informational purposes only. Not financial or real estate advice.</span>
 </footer>
 
-<!-- ── Listing Detail Modal ───────────────────────────────────── -->
+<!-- ─── MODAL ─────────────────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
+  <div class="modal">
+    <span class="modal-handle"></span>
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-price" id="modal-price"></div>
-    <div class="modal-address" id="modal-address"></div>
-    <div class="modal-city" id="modal-city"></div>
-    <div class="modal-grid" id="modal-stats"></div>
-    <a class="modal-link" id="modal-link" href="#" target="_blank" rel="noopener">View Listing ↗</a>
+    <div class="modal-status-row">
+      <span id="modal-status-badge" class="status-badge status-Active">Active</span>
+      <span id="modal-type-badge"   class="type-badge">House</span>
+    </div>
+    <div class="modal-price"   id="modal-price">$0</div>
+    <div class="modal-address" id="modal-address">—</div>
+    <div class="modal-city"    id="modal-city">—</div>
+    <div class="modal-divider"></div>
+    <div class="modal-grid"    id="modal-stats"></div>
+    <a class="modal-cta" id="modal-link" href="#" target="_blank" rel="noopener">
+      View Full Listing
+      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+        <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+    </a>
   </div>
 </div>
 
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
-// !! REPLACE with your actual GitHub username and repo name !!
-const GITHUB_USER = 'wetmud';
-const GITHUB_REPO = 'realestate-scraper-1-';
+const GITHUB_USER = 'YOUR_USERNAME';
+const GITHUB_REPO = 're-pulse-scraper';
 const DATA_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/analysis.json`;
 
-// Fallback data used when running locally (file://) or if fetch fails
 const FALLBACK_DATA = {"generated_at":"2026-02-27T15:14:46.860537","total_listings":15,"by_status":{"active":12,"pending":2,"sold":1},"pricing":{"avg_list_price":1746466,"median_list_price":1480000,"min_price":549000,"max_price":4500000,"avg_active_price":1826916,"avg_price_per_sqft":968,"median_price_per_sqft":926},"velocity":{"avg_days_on_market":10.1,"median_days_on_market":8,"listings_under_7_days":7,"listings_over_30_days":0},"inventory":{"avg_sqft":2045,"supply_demand_ratio":4.0,"market_signal":"Buyer's Market"},"by_type":{"House":{"count":6,"avg_price":2603333,"median_price":2500000},"Condo":{"count":7,"avg_price":1086000,"median_price":899000},"Townhouse":{"count":2,"avg_price":1487500,"median_price":1487500}},"listings":[{"listing_id":"24680123","property_address":"42 Elm St","city":"Toronto","state_or_province":"ON","postal_code":"M5G 1H5","listing_price":1125000,"property_type":"House","bedrooms":4,"bathrooms":3.0,"square_feet":1950,"price_per_sqft":576,"listing_date":"2026-02-22","days_on_market":5,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24680123/listing","image_url":null,"agent_name":"Sarah Chen","brokerage_name":"Royal LePage"},{"listing_id":"24681456","property_address":"810 King St W, Unit 305","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1N7","listing_price":699000,"property_type":"Condo","bedrooms":1,"bathrooms":1.0,"square_feet":560,"price_per_sqft":1248,"listing_date":"2026-02-15","days_on_market":12,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24681456/listing","image_url":null,"agent_name":"Michael Park","brokerage_name":"Sutton Group"},{"listing_id":"24682789","property_address":"55 Harbord St","city":"Toronto","state_or_province":"ON","postal_code":"M5S 1G4","listing_price":2250000,"property_type":"House","bedrooms":5,"bathrooms":4.5,"square_feet":3200,"price_per_sqft":703,"listing_date":"2026-02-24","days_on_market":3,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24682789/listing","image_url":null,"agent_name":"Linda Zhao","brokerage_name":"Sotheby's Realty"},{"listing_id":"24683012","property_address":"1200 Bay St, Unit 1802","city":"Toronto","state_or_province":"ON","postal_code":"M5R 2A5","listing_price":1480000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":1100,"price_per_sqft":1345,"listing_date":"2026-02-18","days_on_market":9,"listing_status":"Pending","listing_url":"https://www.realtor.ca/real-estate/24683012/listing","image_url":null,"agent_name":"David Kim","brokerage_name":"Bosley Real Estate"},{"listing_id":"24684345","property_address":"33 Roncesvalles Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6R 2K4","listing_price":1650000,"property_type":"Townhouse","bedrooms":3,"bathrooms":2.5,"square_feet":1780,"price_per_sqft":926,"listing_date":"2026-02-20","days_on_market":7,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24684345/listing","image_url":null,"agent_name":"Emma Walsh","brokerage_name":"Re/Max Hallmark"},{"listing_id":"24685678","property_address":"90 Broadview Ave, Unit 4A","city":"Toronto","state_or_province":"ON","postal_code":"M4M 2E4","listing_price":549000,"property_type":"Condo","bedrooms":1,"bathrooms":1.0,"square_feet":480,"price_per_sqft":1143,"listing_date":"2026-02-06","days_on_market":21,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24685678/listing","image_url":null,"agent_name":null,"brokerage_name":null},{"listing_id":"24686901","property_address":"175 Hanna Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6K 1X2","listing_price":3100000,"property_type":"House","bedrooms":6,"bathrooms":5.0,"square_feet":4400,"price_per_sqft":704,"listing_date":"2026-02-25","days_on_market":2,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24686901/listing","image_url":null,"agent_name":"James Osei","brokerage_name":"Chestnut Park Real Estate"},{"listing_id":"24687234","property_address":"222 Spadina Ave, Unit 907","city":"Toronto","state_or_province":"ON","postal_code":"M5T 3A5","listing_price":775000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":820,"price_per_sqft":945,"listing_date":"2026-02-12","days_on_market":15,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24687234/listing","image_url":null,"agent_name":"Priya Nair","brokerage_name":"Realty One"},{"listing_id":"24688567","property_address":"48 Ossington Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6J 2Y8","listing_price":1895000,"property_type":"House","bedrooms":4,"bathrooms":3.0,"square_feet":2100,"price_per_sqft":902,"listing_date":"2026-02-23","days_on_market":4,"listing_status":"Sold","listing_url":"https://www.realtor.ca/real-estate/24688567/listing","image_url":null,"agent_name":"Tom Bradley","brokerage_name":"Forest Hill Real Estate"},{"listing_id":"24689890","property_address":"300 Front St W, Unit 2210","city":"Toronto","state_or_province":"ON","postal_code":"M5V 0E9","listing_price":2050000,"property_type":"Condo","bedrooms":3,"bathrooms":3.0,"square_feet":1680,"price_per_sqft":1220,"listing_date":"2026-02-09","days_on_market":18,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24689890/listing","image_url":null,"agent_name":"Aisha Mohammed","brokerage_name":"Brad J. Lamb Realty"},{"listing_id":"24690123","property_address":"61 Fern Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6R 1K3","listing_price":1325000,"property_type":"Townhouse","bedrooms":3,"bathrooms":2.0,"square_feet":1450,"price_per_sqft":913,"listing_date":"2026-02-21","days_on_market":6,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24690123/listing","image_url":null,"agent_name":"Carlos Rivera","brokerage_name":"Century 21"},{"listing_id":"24691456","property_address":"88 Davenport Rd, Unit 301","city":"Toronto","state_or_province":"ON","postal_code":"M5R 1H8","listing_price":1150000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":1050,"price_per_sqft":1095,"listing_date":"2026-01-28","days_on_market":30,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24691456/listing","image_url":null,"agent_name":"Nancy Wu","brokerage_name":"Keller Williams"},{"listing_id":"24692789","property_address":"10 Niagara St","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1C4","listing_price":4500000,"property_type":"House","bedrooms":5,"bathrooms":6.0,"square_feet":5800,"price_per_sqft":775,"listing_date":"2026-02-26","days_on_market":1,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24692789/listing","image_url":null,"agent_name":"Victor Tran","brokerage_name":"Platinum Realty"},{"listing_id":"24693012","property_address":"450 Wellington St W, Unit 215","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1E3","listing_price":899000,"property_type":"Condo","bedrooms":1,"bathrooms":1.5,"square_feet":710,"price_per_sqft":1266,"listing_date":"2026-02-19","days_on_market":8,"listing_status":"Pending","listing_url":"https://www.realtor.ca/real-estate/24693012/listing","image_url":null,"agent_name":"Rita Singh","brokerage_name":"Cityscape Real Estate"},{"listing_id":"24694345","property_address":"27 Chester Hill Rd","city":"Toronto","state_or_province":"ON","postal_code":"M4K 1X5","listing_price":2750000,"property_type":"House","bedrooms":4,"bathrooms":4.0,"square_feet":3600,"price_per_sqft":763,"listing_date":"2026-02-16","days_on_market":11,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24694345/listing","image_url":null,"agent_name":"Paul Hennessey","brokerage_name":"Sage Real Estate"}]};
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -809,62 +997,50 @@ let activeFilter = 'All';
 let chartInstances = {};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const fmt  = (n) => n != null ? '$' + n.toLocaleString() : '—';
 const fmtK = (n) => n >= 1_000_000 ? '$' + (n/1_000_000).toFixed(2) + 'M' : '$' + (n/1_000).toFixed(0) + 'K';
 
-// ── Loading skeleton ──────────────────────────────────────────────────────────
+// ── Loading ───────────────────────────────────────────────────────────────────
 function showLoading() {
-  const overlay = document.createElement('div');
-  overlay.id = 'loadingOverlay';
-  overlay.style.cssText = `
-    position:fixed; inset:0; background:rgba(244,240,232,0.88);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    z-index:900; backdrop-filter:blur(6px);
-    font-family:'IBM Plex Mono',monospace;
-  `;
-  overlay.innerHTML = `
-    <div style="width:48px;height:48px;border:3px solid #c8b99a;border-top-color:#c1440e;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1.5rem;"></div>
-    <div style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:#7a7166;">Fetching live data…</div>
-    <div id="loadingSource" style="font-size:0.58rem;color:#c8b99a;margin-top:0.5rem;max-width:300px;text-align:center;word-break:break-all;"></div>
-    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-  `;
-  document.body.appendChild(overlay);
-  document.getElementById('loadingSource').textContent = DATA_URL;
+  const el = document.createElement('div');
+  el.id = 'loadingOverlay';
+  el.innerHTML = `
+    <div class="loading-spinner"></div>
+    <div class="loading-label">Fetching live data</div>
+    <div class="loading-url" id="loadingSource">${DATA_URL}</div>`;
+  document.body.appendChild(el);
 }
 
 function hideLoading() {
   const el = document.getElementById('loadingOverlay');
   if (el) {
-    el.style.transition = 'opacity 0.3s';
+    el.style.transition = 'opacity 0.25s';
     el.style.opacity = '0';
-    setTimeout(() => el.remove(), 300);
+    setTimeout(() => el.remove(), 250);
   }
 }
 
 function showDataBanner(source, timestamp) {
   const existing = document.getElementById('dataBanner');
   if (existing) existing.remove();
-  const ts = timestamp ? new Date(timestamp).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' }) : 'unknown';
+  const ts = timestamp
+    ? new Date(timestamp).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' })
+    : 'unknown';
   const banner = document.createElement('div');
   banner.id = 'dataBanner';
-  banner.style.cssText = `
-    background:${source === 'live' ? '#2a6049' : '#856404'};
-    color:white; font-family:'IBM Plex Mono',monospace; font-size:0.62rem;
-    letter-spacing:0.1em; text-align:center; padding:0.4rem;
-  `;
-  banner.textContent = source === 'live'
-    ? `✓ LIVE DATA  ·  Last scraped: ${ts}  ·  Auto-refreshes daily via GitHub Actions`
-    : `⚠ DEMO DATA  ·  Could not reach GitHub — showing bundled sample data  ·  Deploy to GitHub Pages for live data`;
-  document.querySelector('header').insertAdjacentElement('afterend', banner);
+  if (source === 'live') {
+    banner.style.cssText = 'background:#d1fae5;color:#065f46;font-family:var(--mono);font-size:11.5px;text-align:center;padding:6px 16px;letter-spacing:0.04em;';
+    banner.textContent = `✓  Live data  ·  Last scraped ${ts}  ·  Auto-refreshes daily`;
+  } else {
+    banner.style.cssText = 'background:#fef3c7;color:#92400e;font-family:var(--mono);font-size:11.5px;text-align:center;padding:6px 16px;letter-spacing:0.04em;';
+    banner.textContent = `⚠  Demo data  ·  Could not reach GitHub — showing bundled sample  ·  Deploy to GitHub Pages for live data`;
+  }
+  document.querySelector('nav').insertAdjacentElement('afterend', banner);
 }
 
-// ── Data fetch with fallback ──────────────────────────────────────────────────
+// ── Fetch ─────────────────────────────────────────────────────────────────────
 async function loadData() {
   showLoading();
-
-  // Don't try to fetch when running locally as file:// — use fallback immediately
   const isLocal = window.location.protocol === 'file:';
-
   if (!isLocal) {
     try {
       const res = await fetch(DATA_URL, { cache: 'no-cache' });
@@ -874,52 +1050,45 @@ async function loadData() {
       showDataBanner('live', data.generated_at);
       return data;
     } catch (err) {
-      console.warn('Live fetch failed, using fallback data:', err.message);
+      console.warn('Live fetch failed:', err.message);
     }
   }
-
   hideLoading();
   showDataBanner('fallback', FALLBACK_DATA.generated_at);
   return FALLBACK_DATA;
 }
 
-// ── KPI header population ─────────────────────────────────────────────────────
+// ── KPIs ──────────────────────────────────────────────────────────────────────
 function populateKPIs(DATA) {
   const p = DATA.pricing, v = DATA.velocity, inv = DATA.inventory, s = DATA.by_status;
 
-  // Avg list price
-  document.querySelector('.hero-kpi:nth-child(1) .hero-kpi-value').innerHTML =
-    `<span class="currency">$</span>${(p.avg_list_price/1_000_000).toFixed(2)}M`;
-  document.querySelector('.hero-kpi:nth-child(1) .hero-kpi-sub').textContent =
-    `Median ${fmtK(p.median_list_price)}`;
+  const kpis = document.querySelectorAll('.kpi');
 
-  // $/sqft
-  document.querySelector('.hero-kpi:nth-child(2) .hero-kpi-value').innerHTML =
-    `<span class="currency">$</span>${p.avg_price_per_sqft}`;
-  document.querySelector('.hero-kpi:nth-child(2) .hero-kpi-sub').textContent =
-    `Median $${p.median_price_per_sqft}/sqft`;
+  kpis[0].querySelector('.hero-kpi-value').innerHTML = `<span class="unit">$</span>${(p.avg_list_price/1_000_000).toFixed(2)}M`;
+  kpis[0].querySelector('.hero-kpi-sub').textContent   = `Median ${fmtK(p.median_list_price)}`;
 
-  // DOM
-  document.querySelector('.hero-kpi:nth-child(3) .hero-kpi-value').textContent = v.avg_days_on_market;
-  document.querySelector('.hero-kpi:nth-child(3) .hero-kpi-sub').textContent =
-    `Median ${v.median_days_on_market} days`;
+  kpis[1].querySelector('.hero-kpi-value').innerHTML = `<span class="unit">$</span>${p.avg_price_per_sqft}`;
+  kpis[1].querySelector('.hero-kpi-sub').textContent  = `Median $${p.median_price_per_sqft}/sqft`;
 
-  // Listing counts
-  document.querySelector('.hero-kpi:nth-child(4) .hero-kpi-value').textContent = DATA.total_listings;
-  document.querySelector('.hero-kpi:nth-child(4) .hero-kpi-sub').textContent =
-    `${s.active} Active · ${s.pending} Pending · ${s.sold} Sold`;
-  document.querySelector('.hero-kpi:nth-child(4) .hero-kpi-delta').textContent =
-    `Supply ratio ${inv.supply_demand_ratio}`;
+  kpis[2].querySelector('.hero-kpi-value').textContent = v.avg_days_on_market;
+  kpis[2].querySelector('.hero-kpi-sub').textContent   = `Median ${v.median_days_on_market} days`;
 
-  // Header signal badge
+  kpis[3].querySelector('.hero-kpi-value').textContent = DATA.total_listings;
+  kpis[3].querySelector('.hero-kpi-sub').textContent   = `${s.active} Active · ${s.pending} Pending · ${s.sold} Sold`;
+  kpis[3].querySelector('.hero-kpi-delta').textContent = `Supply ratio ${inv.supply_demand_ratio}`;
+
+  // Nav badge
   const badge = document.getElementById('signal-badge');
   badge.textContent = inv.market_signal;
-  if (inv.market_signal === "Seller's Market") badge.style.cssText += 'background:rgba(42,96,73,0.2);border-color:#2a6049;color:#2a6049;';
+  badge.className = 'signal-chip ' +
+    (inv.market_signal === "Seller's Market" ? 'sellers' :
+     inv.market_signal === "Balanced Market" ? 'balanced' : 'buyers');
 
-  // Header date
-  const ts = DATA.generated_at ? new Date(DATA.generated_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }) : '—';
-  document.querySelector('.header-meta > div > div:first-child').textContent = 'Toronto, ON';
-  document.querySelector('.header-meta > div > div:last-child').textContent = `Updated ${ts}`;
+  // Nav updated
+  const ts = DATA.generated_at
+    ? new Date(DATA.generated_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' })
+    : '—';
+  document.getElementById('nav-updated').textContent = `Updated ${ts}`;
 }
 
 // ── Inventory bars ────────────────────────────────────────────────────────────
@@ -927,59 +1096,59 @@ function populateInventoryBars(DATA) {
   const bt = DATA.by_type;
   const types = ['House', 'Condo', 'Townhouse'];
   const total = Object.values(bt).reduce((a, b) => a + b.count, 0);
-
   const cards = document.querySelectorAll('.inv-card');
+
   types.forEach((type, i) => {
     const d = bt[type];
     if (!d || !cards[i]) return;
     const pct = Math.round((d.count / total) * 100);
-    cards[i].querySelector('.inv-card-value').innerHTML =
-      `${d.count} <span style="font-size:1rem;color:var(--muted);">listings</span>`;
+    cards[i].querySelector('.inv-card-value').innerHTML = `${d.count} <span>listings</span>`;
     cards[i].querySelector('.inv-bar-fill').dataset.width = pct;
-    cards[i].querySelectorAll('.inv-bar-legend span')[0].textContent = `Avg ${fmtK(d.avg_price)}`;
-    cards[i].querySelectorAll('.inv-bar-legend span')[1].textContent = `Median ${fmtK(d.median_price)}`;
+    cards[i].querySelector('.inv-bar-legend-avg').textContent = `Avg ${fmtK(d.avg_price)}`;
+    cards[i].querySelector('.inv-bar-legend-med').textContent = `Median ${fmtK(d.median_price)}`;
   });
 
   // Filter button counts
   const s = DATA.by_status;
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  filterBtns[0].textContent = `All (${DATA.total_listings})`;
-  filterBtns[1].textContent = `Active (${s.active})`;
-  filterBtns[2].textContent = `Pending (${s.pending})`;
-  filterBtns[3].textContent = `Sold (${s.sold})`;
+  const btns = document.querySelectorAll('.filter-btn');
+  btns[0].textContent = `All (${DATA.total_listings})`;
+  btns[1].textContent = `Active (${s.active})`;
+  btns[2].textContent = `Pending (${s.pending})`;
+  btns[3].textContent = `Sold (${s.sold})`;
 }
 
 // ── Table ─────────────────────────────────────────────────────────────────────
 function renderTable(data) {
   const tbody = document.getElementById('tableBody');
-  if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;">NO LISTINGS MATCH FILTER</td></tr>`;
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="11" class="no-results">No listings match</td></tr>`;
     return;
   }
   tbody.innerHTML = data.map(l => {
     const dom = l.days_on_market;
-    const domClass = dom <= 7 ? 'dom-fast' : dom <= 20 ? 'dom-medium' : 'dom-slow';
+    const domCls = dom <= 7 ? 'dom-fast' : dom <= 20 ? 'dom-medium' : 'dom-slow';
+    const domPct = dom != null ? Math.min(dom / 30, 1) * 100 : 0;
     return `
     <tr onclick='openModal(${JSON.stringify(l).replace(/'/g,"&#39;")})'>
-      <td class="listing-id-cell">${l.listing_id}</td>
+      <td class="td-id">${l.listing_id}</td>
       <td>
-        <div style="font-weight:500;">${l.property_address}</div>
-        <div style="font-size:0.65rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;">${l.postal_code || ''}</div>
+        <div class="td-address-main">${l.property_address}</div>
+        <div class="td-address-postal">${l.postal_code || ''}</div>
       </td>
-      <td><span class="type-tag">${l.property_type}</span></td>
-      <td class="price-cell">${fmtK(l.listing_price)}</td>
-      <td class="ppsf-cell">${l.price_per_sqft != null ? '$'+l.price_per_sqft : '—'}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;">${l.bedrooms ?? '—'}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;">${l.bathrooms ?? '—'}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;">${l.square_feet != null ? l.square_feet.toLocaleString() : '—'}</td>
+      <td><span class="type-badge">${l.property_type}</span></td>
+      <td class="td-price">${fmtK(l.listing_price)}</td>
+      <td class="td-ppsf">${l.price_per_sqft != null ? '$'+l.price_per_sqft : '—'}</td>
+      <td class="td-num">${l.bedrooms ?? '—'}</td>
+      <td class="td-num">${l.bathrooms ?? '—'}</td>
+      <td class="td-num">${l.square_feet != null ? l.square_feet.toLocaleString() : '—'}</td>
       <td>
-        <div class="dom-indicator">
-          <span class="dom-dot ${domClass}"></span>
-          <span style="font-family:'IBM Plex Mono',monospace;">${dom != null ? dom + 'd' : '—'}</span>
+        <div class="dom-wrap ${domCls}">
+          <div class="dom-bar-bg"><div class="dom-bar-fill" style="width:${domPct}%"></div></div>
+          ${dom != null ? dom+'d' : '—'}
         </div>
       </td>
-      <td><span class="status-pill status-${l.listing_status}">${l.listing_status}</span></td>
-      <td class="agent-cell">${l.agent_name || '—'}</td>
+      <td><span class="status-badge status-${l.listing_status}">${l.listing_status}</span></td>
+      <td class="td-agent">${l.agent_name || '—'}</td>
     </tr>`;
   }).join('');
 }
@@ -991,13 +1160,13 @@ function filterTable(key, btn) {
   applyFilters();
 }
 
-function searchTable(query) { applyFilters(query); }
+function searchTable(q) { applyFilters(q); }
 
 function applyFilters(query) {
   const q = (query !== undefined ? query : document.getElementById('searchInput').value).toLowerCase();
   filteredListings = LISTINGS.filter(l => {
     const matchFilter = activeFilter === 'All' || l.listing_status === activeFilter || l.property_type === activeFilter;
-    const matchSearch = !q || l.property_address.toLowerCase().includes(q) || (l.postal_code || '').toLowerCase().includes(q);
+    const matchSearch = !q || l.property_address.toLowerCase().includes(q) || (l.postal_code||'').toLowerCase().includes(q);
     return matchFilter && matchSearch;
   });
   if (sortKey) {
@@ -1010,176 +1179,187 @@ function applyFilters(query) {
 }
 
 function sortTable(key) {
-  if (sortKey === key) sortDir *= -1;
-  else { sortKey = key; sortDir = 1; }
-  document.querySelectorAll('.listings-table th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
-  const keys = ['listing_id','property_address','property_type','listing_price','price_per_sqft','bedrooms','bathrooms','square_feet','days_on_market','listing_status','agent_name'];
-  const idx = keys.indexOf(key);
-  if (idx >= 0) document.querySelectorAll('.listings-table th')[idx].classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+  if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+  document.querySelectorAll('th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+  const KEYS = ['listing_id','property_address','property_type','listing_price','price_per_sqft','bedrooms','bathrooms','square_feet','days_on_market','listing_status','agent_name'];
+  const idx = KEYS.indexOf(key);
+  if (idx >= 0) document.querySelectorAll('th')[idx].classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
   applyFilters();
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function openModal(l) {
-  document.getElementById('modal-price').textContent = fmtK(l.listing_price);
+  document.getElementById('modal-price').textContent   = fmtK(l.listing_price);
   document.getElementById('modal-address').textContent = l.property_address;
-  document.getElementById('modal-city').textContent = `${l.city}, ${l.state_or_province}  ${l.postal_code || ''}`;
+  document.getElementById('modal-city').textContent    = `${l.city}, ${l.state_or_province}  ${l.postal_code || ''}`;
+
+  const sb = document.getElementById('modal-status-badge');
+  sb.textContent = l.listing_status;
+  sb.className = `status-badge status-${l.listing_status}`;
+  document.getElementById('modal-type-badge').textContent = l.property_type;
+
   document.getElementById('modal-stats').innerHTML = [
-    ['Type', l.property_type], ['Status', l.listing_status],
-    ['Bedrooms', l.bedrooms ?? '—'], ['Bathrooms', l.bathrooms ?? '—'],
-    ['Square Feet', l.square_feet?.toLocaleString() ?? '—'],
-    ['$/sqft', l.price_per_sqft != null ? '$'+l.price_per_sqft : '—'],
-    ['Days on Market', l.days_on_market != null ? l.days_on_market + ' days' : '—'],
-    ['Listed', l.listing_date ?? '—'],
-    ['Agent', l.agent_name ?? '—'], ['Brokerage', l.brokerage_name ?? '—'],
-  ].map(([k,v]) => `<div class="modal-stat"><div class="modal-stat-label">${k}</div><div class="modal-stat-value">${v}</div></div>`).join('');
+    ['Bedrooms',      l.bedrooms ?? '—'],
+    ['Bathrooms',     l.bathrooms ?? '—'],
+    ['Square Feet',   l.square_feet?.toLocaleString() ?? '—'],
+    ['Price / sqft',  l.price_per_sqft != null ? '$'+l.price_per_sqft : '—'],
+    ['Days on Market',l.days_on_market != null ? l.days_on_market+' days' : '—'],
+    ['Listed',        l.listing_date ?? '—'],
+    ['Agent',         l.agent_name ?? '—'],
+    ['Brokerage',     l.brokerage_name ?? '—'],
+  ].map(([k,v]) => `
+    <div>
+      <div class="modal-stat-label">${k}</div>
+      <div class="modal-stat-value">${v}</div>
+    </div>`).join('');
+
   document.getElementById('modal-link').href = l.listing_url;
   document.getElementById('modalOverlay').classList.add('open');
 }
 
 function closeModal(e) {
-  if (!e || e.target === document.getElementById('modalOverlay') || e.currentTarget?.classList.contains('modal-close')) {
+  if (!e || e.target === document.getElementById('modalOverlay') || e.currentTarget?.classList.contains('modal-close'))
     document.getElementById('modalOverlay').classList.remove('open');
-  }
 }
-
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal({target: document.getElementById('modalOverlay')}); });
 
 // ── Charts ────────────────────────────────────────────────────────────────────
-const PALETTE = { red: '#c1440e', green: '#2a6049', blue: '#1a3a5c', gold: '#c9a84c', warm: '#c8b99a', muted: '#7a7166' };
-const globalFont = { family: "'IBM Plex Mono', monospace", size: 11 };
-Chart.defaults.font = globalFont;
-Chart.defaults.color = '#7a7166';
+const C = {
+  blue:   '#0071e3',
+  green:  '#1d8348',
+  amber:  '#b45309',
+  red:    '#d73027',
+  muted:  '#aeaeb2',
+  border: 'rgba(0,0,0,0.06)',
+};
 
-function destroyChart(id) {
-  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
-}
+const gFont = { family: "'DM Mono', ui-monospace, monospace", size: 11 };
+Chart.defaults.font = gFont;
+Chart.defaults.color = '#6e6e73';
+
+function dc(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
 
 function buildCharts(DATA) {
-  const LISTINGS_LOCAL = DATA.listings;
+  const L  = DATA.listings;
   const bt = DATA.by_type;
   const types = Object.keys(bt);
 
-  // ── Price by type ──
-  destroyChart('priceByTypeChart');
+  // ── Price by type ──────────────────────────────────────────────────────────
+  dc('priceByTypeChart');
   chartInstances['priceByTypeChart'] = new Chart(document.getElementById('priceByTypeChart'), {
     type: 'bar',
     data: {
       labels: types,
       datasets: [
-        { label: 'Avg Price',    data: types.map(t => bt[t].avg_price),    backgroundColor: PALETTE.red  + 'cc', borderWidth: 0 },
-        { label: 'Median Price', data: types.map(t => bt[t].median_price), backgroundColor: PALETTE.blue + '99', borderWidth: 0 },
+        { label: 'Avg',    data: types.map(t => bt[t].avg_price),    backgroundColor: C.blue + 'cc',   borderWidth: 0, borderRadius: 4 },
+        { label: 'Median', data: types.map(t => bt[t].median_price), backgroundColor: C.blue + '33',   borderWidth: 0, borderRadius: 4 },
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { position: 'bottom', labels: { font: globalFont, boxWidth: 12 } } },
+      plugins: { legend: { position: 'bottom', labels: { font: gFont, boxWidth: 10, padding: 14 } } },
       scales: {
-        y: { ticks: { callback: v => '$' + (v/1_000_000).toFixed(1) + 'M', font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } },
-        x: { grid: { display: false } }
+        y: { ticks: { callback: v => '$'+(v/1e6).toFixed(1)+'M', font: gFont }, grid: { color: C.border }, border: { display: false } },
+        x: { grid: { display: false }, border: { display: false } }
       }
     }
   });
 
-  // ── Status donut ──
-  destroyChart('statusChart');
+  // ── Status donut ───────────────────────────────────────────────────────────
+  dc('statusChart');
   const s = DATA.by_status;
   chartInstances['statusChart'] = new Chart(document.getElementById('statusChart'), {
     type: 'doughnut',
     data: {
       labels: ['Active', 'Pending', 'Sold'],
-      datasets: [{ data: [s.active, s.pending, s.sold], backgroundColor: [PALETTE.green, PALETTE.gold, PALETTE.red], borderWidth: 0, hoverOffset: 4 }]
+      datasets: [{ data: [s.active, s.pending, s.sold], backgroundColor: [C.green, C.amber, C.red], borderWidth: 0, hoverOffset: 4 }]
     },
     options: {
       responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { position: 'bottom', labels: { font: globalFont, boxWidth: 12 } } },
-      cutout: '65%'
+      plugins: { legend: { position: 'bottom', labels: { font: gFont, boxWidth: 10, padding: 14 } } },
+      cutout: '68%'
     }
   });
 
-  // ── DOM histogram ──
-  destroyChart('domChart');
-  const doms = LISTINGS_LOCAL.map(l => l.days_on_market).filter(d => d != null);
-  const buckets = [0, 0, 0, 0, 0];
-  doms.forEach(d => {
-    if (d <= 3) buckets[0]++;
-    else if (d <= 7) buckets[1]++;
-    else if (d <= 14) buckets[2]++;
-    else if (d <= 21) buckets[3]++;
-    else buckets[4]++;
-  });
+  // ── DOM histogram ──────────────────────────────────────────────────────────
+  dc('domChart');
+  const doms = L.map(l => l.days_on_market).filter(d => d != null);
+  const bkts = [0,0,0,0,0];
+  doms.forEach(d => { if(d<=3)bkts[0]++; else if(d<=7)bkts[1]++; else if(d<=14)bkts[2]++; else if(d<=21)bkts[3]++; else bkts[4]++; });
   chartInstances['domChart'] = new Chart(document.getElementById('domChart'), {
     type: 'bar',
     data: {
-      labels: ['0–3d', '4–7d', '8–14d', '15–21d', '22d+'],
-      datasets: [{ data: buckets, backgroundColor: [PALETTE.green+'cc', PALETTE.green+'99', PALETTE.gold+'cc', PALETTE.red+'99', PALETTE.red+'cc'], borderWidth: 0 }]
+      labels: ['0–3d','4–7d','8–14d','15–21d','22d+'],
+      datasets: [{ data: bkts, backgroundColor: [C.green+'cc',C.green+'88',C.amber+'cc',C.red+'88',C.red+'cc'], borderWidth: 0, borderRadius: 4 }]
     },
     options: {
       responsive: true, maintainAspectRatio: true,
       plugins: { legend: { display: false } },
-      scales: { y: { ticks: { stepSize: 1, font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+      scales: {
+        y: { ticks: { stepSize: 1, font: gFont }, grid: { color: C.border }, border: { display: false } },
+        x: { grid: { display: false }, border: { display: false } }
+      }
     }
   });
 
-  // ── Scatter: Price vs Sqft ──
-  destroyChart('scatterChart');
-  const scatterColors = { House: PALETTE.red, Condo: PALETTE.blue, Townhouse: PALETTE.gold };
-  const scatterData = LISTINGS_LOCAL.filter(l => l.square_feet).map(l => ({ x: l.square_feet, y: l.listing_price / 1000, type: l.property_type }));
+  // ── Scatter ────────────────────────────────────────────────────────────────
+  dc('scatterChart');
+  const scColors = { House: C.blue, Condo: C.green, Townhouse: C.amber };
+  const scData = L.filter(l => l.square_feet).map(l => ({ x: l.square_feet, y: l.listing_price/1000, type: l.property_type }));
   chartInstances['scatterChart'] = new Chart(document.getElementById('scatterChart'), {
     type: 'scatter',
     data: {
       datasets: types.map(type => ({
         label: type,
-        data: scatterData.filter(d => d.type === type).map(d => ({ x: d.x, y: d.y })),
-        backgroundColor: (scatterColors[type] || PALETTE.muted) + 'cc',
-        borderColor: scatterColors[type] || PALETTE.muted,
-        borderWidth: 1, pointRadius: 7, pointHoverRadius: 9,
+        data: scData.filter(d => d.type === type).map(d => ({x:d.x, y:d.y})),
+        backgroundColor: (scColors[type]||C.muted) + 'bb',
+        borderColor: scColors[type]||C.muted,
+        borderWidth: 1, pointRadius: 6, pointHoverRadius: 8,
       }))
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { font: globalFont, boxWidth: 12 } } },
+      plugins: { legend: { position: 'bottom', labels: { font: gFont, boxWidth: 10, padding: 14 } } },
       scales: {
-        x: { title: { display: true, text: 'Square Feet', font: globalFont }, ticks: { font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } },
-        y: { title: { display: true, text: 'Price ($K)', font: globalFont }, ticks: { callback: v => '$' + v + 'K', font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        x: { title: { display: true, text: 'Square Feet', font: gFont }, ticks: { font: gFont }, grid: { color: C.border }, border: { display: false } },
+        y: { title: { display: true, text: 'Price ($K)', font: gFont }, ticks: { callback: v => '$'+v+'K', font: gFont }, grid: { color: C.border }, border: { display: false } }
       }
     }
   });
 
-  // ── PPSF by type ──
-  destroyChart('ppsfChart');
+  // ── PPSF ───────────────────────────────────────────────────────────────────
+  dc('ppsfChart');
   const ppsfByType = {};
-  LISTINGS_LOCAL.filter(l => l.price_per_sqft).forEach(l => {
+  L.filter(l => l.price_per_sqft).forEach(l => {
     if (!ppsfByType[l.property_type]) ppsfByType[l.property_type] = [];
     ppsfByType[l.property_type].push(l.price_per_sqft);
   });
-  const ppsfAvgs = Object.entries(ppsfByType).map(([k, v]) => ({
-    type: k, avg: Math.round(v.reduce((a,b) => a+b, 0) / v.length), min: Math.min(...v), max: Math.max(...v)
+  const ppsfAvgs = Object.entries(ppsfByType).map(([k,v]) => ({
+    type: k, avg: Math.round(v.reduce((a,b)=>a+b,0)/v.length), min: Math.min(...v), max: Math.max(...v)
   }));
   chartInstances['ppsfChart'] = new Chart(document.getElementById('ppsfChart'), {
     type: 'bar',
     data: {
       labels: ppsfAvgs.map(d => d.type),
-      datasets: [{ label: 'Avg $/sqft', data: ppsfAvgs.map(d => d.avg), backgroundColor: [PALETTE.red+'cc', PALETTE.blue+'cc', PALETTE.gold+'cc'], borderWidth: 0 }]
+      datasets: [{ data: ppsfAvgs.map(d => d.avg), backgroundColor: [C.blue+'cc',C.green+'cc',C.amber+'cc'], borderWidth: 0, borderRadius: 4 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { afterLabel: (ctx) => { const d = ppsfAvgs[ctx.dataIndex]; return `Range: $${d.min} – $${d.max}`; } } }
+        tooltip: { callbacks: { afterLabel: ctx => `Range: $${ppsfAvgs[ctx.dataIndex].min} – $${ppsfAvgs[ctx.dataIndex].max}` } }
       },
       scales: {
-        y: { ticks: { callback: v => '$' + v, font: globalFont }, grid: { color: 'rgba(0,0,0,0.05)' } },
-        x: { grid: { display: false } }
+        y: { ticks: { callback: v => '$'+v, font: gFont }, grid: { color: C.border }, border: { display: false } },
+        x: { grid: { display: false }, border: { display: false } }
       }
     }
   });
 }
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   const DATA = await loadData();
-
   LISTINGS = DATA.listings;
   filteredListings = [...LISTINGS];
 
@@ -1188,7 +1368,6 @@ async function init() {
   buildCharts(DATA);
   renderTable(LISTINGS);
 
-  // Animate inventory bars after a short delay
   setTimeout(() => {
     document.querySelectorAll('.inv-bar-fill').forEach(el => {
       el.style.width = el.dataset.width + '%';
