@@ -1,0 +1,56 @@
+name: Daily RE Scrape
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # Every day at 8am UTC
+  workflow_dispatch:        # Also allows manual "Run workflow" button
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Run scraper pipeline
+        run: python3 scheduler.py --site demo   # swap 'demo' for 'realtor_ca' etc.
+
+      - name: Commit updated data back to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet || git commit -m "data: scrape run $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
+```
+
+This workflow will:
+- Run automatically every morning
+- Save the fresh `listings.json` and `analysis.json` back into your repo
+- Be triggerable manually from the GitHub UI at any time
+
+---
+
+## Step 3: Publish the Dashboard via GitHub Pages
+
+Since the dashboard is a static HTML file, GitHub Pages hosts it for free.
+
+1. Go to your repo → **Settings** → **Pages**
+2. Under *Source*, choose **Deploy from a branch**
+3. Select branch: `main`, folder: `/dashboard`
+4. Click **Save**
+
+Your dashboard will be live at:
+```
+https://YOUR_USERNAME.github.io/re-pulse-scraper/
