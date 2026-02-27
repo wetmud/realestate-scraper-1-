@@ -983,8 +983,8 @@ footer {
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
-const GITHUB_USER = 'YOUR_USERNAME';
-const GITHUB_REPO = 're-pulse-scraper';
+const GITHUB_USER = 'wetmud';
+const GITHUB_REPO = 'realestate-scraper-1-';
 const DATA_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/analysis.json`;
 
 const FALLBACK_DATA = {"generated_at":"2026-02-27T15:14:46.860537","total_listings":15,"by_status":{"active":12,"pending":2,"sold":1},"pricing":{"avg_list_price":1746466,"median_list_price":1480000,"min_price":549000,"max_price":4500000,"avg_active_price":1826916,"avg_price_per_sqft":968,"median_price_per_sqft":926},"velocity":{"avg_days_on_market":10.1,"median_days_on_market":8,"listings_under_7_days":7,"listings_over_30_days":0},"inventory":{"avg_sqft":2045,"supply_demand_ratio":4.0,"market_signal":"Buyer's Market"},"by_type":{"House":{"count":6,"avg_price":2603333,"median_price":2500000},"Condo":{"count":7,"avg_price":1086000,"median_price":899000},"Townhouse":{"count":2,"avg_price":1487500,"median_price":1487500}},"listings":[{"listing_id":"24680123","property_address":"42 Elm St","city":"Toronto","state_or_province":"ON","postal_code":"M5G 1H5","listing_price":1125000,"property_type":"House","bedrooms":4,"bathrooms":3.0,"square_feet":1950,"price_per_sqft":576,"listing_date":"2026-02-22","days_on_market":5,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24680123/listing","image_url":null,"agent_name":"Sarah Chen","brokerage_name":"Royal LePage"},{"listing_id":"24681456","property_address":"810 King St W, Unit 305","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1N7","listing_price":699000,"property_type":"Condo","bedrooms":1,"bathrooms":1.0,"square_feet":560,"price_per_sqft":1248,"listing_date":"2026-02-15","days_on_market":12,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24681456/listing","image_url":null,"agent_name":"Michael Park","brokerage_name":"Sutton Group"},{"listing_id":"24682789","property_address":"55 Harbord St","city":"Toronto","state_or_province":"ON","postal_code":"M5S 1G4","listing_price":2250000,"property_type":"House","bedrooms":5,"bathrooms":4.5,"square_feet":3200,"price_per_sqft":703,"listing_date":"2026-02-24","days_on_market":3,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24682789/listing","image_url":null,"agent_name":"Linda Zhao","brokerage_name":"Sotheby's Realty"},{"listing_id":"24683012","property_address":"1200 Bay St, Unit 1802","city":"Toronto","state_or_province":"ON","postal_code":"M5R 2A5","listing_price":1480000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":1100,"price_per_sqft":1345,"listing_date":"2026-02-18","days_on_market":9,"listing_status":"Pending","listing_url":"https://www.realtor.ca/real-estate/24683012/listing","image_url":null,"agent_name":"David Kim","brokerage_name":"Bosley Real Estate"},{"listing_id":"24684345","property_address":"33 Roncesvalles Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6R 2K4","listing_price":1650000,"property_type":"Townhouse","bedrooms":3,"bathrooms":2.5,"square_feet":1780,"price_per_sqft":926,"listing_date":"2026-02-20","days_on_market":7,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24684345/listing","image_url":null,"agent_name":"Emma Walsh","brokerage_name":"Re/Max Hallmark"},{"listing_id":"24685678","property_address":"90 Broadview Ave, Unit 4A","city":"Toronto","state_or_province":"ON","postal_code":"M4M 2E4","listing_price":549000,"property_type":"Condo","bedrooms":1,"bathrooms":1.0,"square_feet":480,"price_per_sqft":1143,"listing_date":"2026-02-06","days_on_market":21,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24685678/listing","image_url":null,"agent_name":null,"brokerage_name":null},{"listing_id":"24686901","property_address":"175 Hanna Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6K 1X2","listing_price":3100000,"property_type":"House","bedrooms":6,"bathrooms":5.0,"square_feet":4400,"price_per_sqft":704,"listing_date":"2026-02-25","days_on_market":2,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24686901/listing","image_url":null,"agent_name":"James Osei","brokerage_name":"Chestnut Park Real Estate"},{"listing_id":"24687234","property_address":"222 Spadina Ave, Unit 907","city":"Toronto","state_or_province":"ON","postal_code":"M5T 3A5","listing_price":775000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":820,"price_per_sqft":945,"listing_date":"2026-02-12","days_on_market":15,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24687234/listing","image_url":null,"agent_name":"Priya Nair","brokerage_name":"Realty One"},{"listing_id":"24688567","property_address":"48 Ossington Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6J 2Y8","listing_price":1895000,"property_type":"House","bedrooms":4,"bathrooms":3.0,"square_feet":2100,"price_per_sqft":902,"listing_date":"2026-02-23","days_on_market":4,"listing_status":"Sold","listing_url":"https://www.realtor.ca/real-estate/24688567/listing","image_url":null,"agent_name":"Tom Bradley","brokerage_name":"Forest Hill Real Estate"},{"listing_id":"24689890","property_address":"300 Front St W, Unit 2210","city":"Toronto","state_or_province":"ON","postal_code":"M5V 0E9","listing_price":2050000,"property_type":"Condo","bedrooms":3,"bathrooms":3.0,"square_feet":1680,"price_per_sqft":1220,"listing_date":"2026-02-09","days_on_market":18,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24689890/listing","image_url":null,"agent_name":"Aisha Mohammed","brokerage_name":"Brad J. Lamb Realty"},{"listing_id":"24690123","property_address":"61 Fern Ave","city":"Toronto","state_or_province":"ON","postal_code":"M6R 1K3","listing_price":1325000,"property_type":"Townhouse","bedrooms":3,"bathrooms":2.0,"square_feet":1450,"price_per_sqft":913,"listing_date":"2026-02-21","days_on_market":6,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24690123/listing","image_url":null,"agent_name":"Carlos Rivera","brokerage_name":"Century 21"},{"listing_id":"24691456","property_address":"88 Davenport Rd, Unit 301","city":"Toronto","state_or_province":"ON","postal_code":"M5R 1H8","listing_price":1150000,"property_type":"Condo","bedrooms":2,"bathrooms":2.0,"square_feet":1050,"price_per_sqft":1095,"listing_date":"2026-01-28","days_on_market":30,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24691456/listing","image_url":null,"agent_name":"Nancy Wu","brokerage_name":"Keller Williams"},{"listing_id":"24692789","property_address":"10 Niagara St","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1C4","listing_price":4500000,"property_type":"House","bedrooms":5,"bathrooms":6.0,"square_feet":5800,"price_per_sqft":775,"listing_date":"2026-02-26","days_on_market":1,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24692789/listing","image_url":null,"agent_name":"Victor Tran","brokerage_name":"Platinum Realty"},{"listing_id":"24693012","property_address":"450 Wellington St W, Unit 215","city":"Toronto","state_or_province":"ON","postal_code":"M5V 1E3","listing_price":899000,"property_type":"Condo","bedrooms":1,"bathrooms":1.5,"square_feet":710,"price_per_sqft":1266,"listing_date":"2026-02-19","days_on_market":8,"listing_status":"Pending","listing_url":"https://www.realtor.ca/real-estate/24693012/listing","image_url":null,"agent_name":"Rita Singh","brokerage_name":"Cityscape Real Estate"},{"listing_id":"24694345","property_address":"27 Chester Hill Rd","city":"Toronto","state_or_province":"ON","postal_code":"M4K 1X5","listing_price":2750000,"property_type":"House","bedrooms":4,"bathrooms":4.0,"square_feet":3600,"price_per_sqft":763,"listing_date":"2026-02-16","days_on_market":11,"listing_status":"Active","listing_url":"https://www.realtor.ca/real-estate/24694345/listing","image_url":null,"agent_name":"Paul Hennessey","brokerage_name":"Sage Real Estate"}]};
@@ -1040,22 +1040,25 @@ function showDataBanner(source, timestamp) {
 // ── Fetch ─────────────────────────────────────────────────────────────────────
 async function loadData() {
   showLoading();
-  const isLocal = window.location.protocol === 'file:';
-  if (!isLocal) {
-    try {
-      const res = await fetch(DATA_URL, { cache: 'no-cache' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      hideLoading();
-      showDataBanner('live', data.generated_at);
-      return data;
-    } catch (err) {
-      console.warn('Live fetch failed:', err.message);
-    }
+  console.log('[RE:PULSE] Fetching:', DATA_URL);
+
+  try {
+    const res = await fetch(DATA_URL, { cache: 'no-cache' });
+    console.log('[RE:PULSE] Response status:', res.status);
+    if (!res.ok) throw new Error(`HTTP ${res.status} — file may not exist yet in repo`);
+    const data = await res.json();
+    console.log('[RE:PULSE] Live data loaded:', data.total_listings, 'listings');
+    hideLoading();
+    showDataBanner('live', data.generated_at);
+    return data;
+  } catch (err) {
+    console.warn('[RE:PULSE] Live fetch failed:', err.message);
+    console.info('[RE:PULSE] Attempted URL:', DATA_URL);
+    console.info('[RE:PULSE] Falling back to bundled demo data.');
+    hideLoading();
+    showDataBanner('fallback', FALLBACK_DATA.generated_at);
+    return FALLBACK_DATA;
   }
-  hideLoading();
-  showDataBanner('fallback', FALLBACK_DATA.generated_at);
-  return FALLBACK_DATA;
 }
 
 // ── KPIs ──────────────────────────────────────────────────────────────────────
